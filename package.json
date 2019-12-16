@@ -5,7 +5,7 @@
   "scripts": {
     "start": "nodemon app.js",
     "start:dev": "DEBUG=Emerald* nodemon app.js",
-    "lint":"eslint . --ext .js"
+    "lint": "eslint . --ext .js"
   },
   "dependencies": {
     "cors": "^2.8.5",

@@ -1,4 +1,3 @@
-require('dotenv').config();
 const debug = require('debug')('Emerald:Redis');
 const redis = require('redis');
 
