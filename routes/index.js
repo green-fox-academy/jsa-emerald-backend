@@ -10,6 +10,14 @@ router.get('/heartbeat', (req, res) => {
   return res.sendStatus(500);
 });
 
+router.post('/backup', (req, res) => {
+  const transactions = req.body;
+  if (transactions.length) {
+    return res.sendStatus(200);
+  }
+  return res.sendStatus(404);
+});
+
 router.get('*', (req, res) => {
   res.sendStatus(404);
 });
