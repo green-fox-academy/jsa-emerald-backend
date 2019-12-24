@@ -18,10 +18,6 @@ router.post('/backup', (req, res) => {
   return res.sendStatus(404);
 });
 
-router.get('*', (req, res) => {
-  res.sendStatus(404);
-});
-
 router.post('/register', (req, res) => {
   if (req.body.email !== '' && req.body.password !== '') {
     res.json({

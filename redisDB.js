@@ -4,6 +4,7 @@ const redis = require('redis');
 const redisClient = redis.createClient({
   host: process.env.DB_HOST,
   port: process.env.DB_PORT,
+  password: process.env.DB_PASS,
 }).on('error', (err) => {
   debug(err.message);
 });
