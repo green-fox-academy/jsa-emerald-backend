@@ -10,8 +10,4 @@ router.get('/heartbeat', (req, res) => {
   return res.sendStatus(500);
 });
 
-router.get('*', (req, res) => {
-  res.sendStatus(404);
-});
-
 module.exports = router;
