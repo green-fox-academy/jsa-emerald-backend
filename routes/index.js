@@ -14,4 +14,14 @@ router.get('*', (req, res) => {
   res.sendStatus(404);
 });
 
+router.post('/register', (req, res) => {
+  if (req.body.email !== '' && req.body.password !== '') {
+    res.json({
+      accessToken: '0xa143981f3ec758296a1575146eab03ef047b7e40',
+    });
+  } else {
+    res.sendStatus(400);
+  }
+});
+
 module.exports = router;
