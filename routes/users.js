@@ -7,6 +7,8 @@ const router = express.Router();
 
 router.get('/', verifyToken, (req, res) => {
   const decoded = jwt.verify(req.token, process.env.JWT_SECRET);
+  const { prefix } = req.query;
+
   if (!decoded) {
     res.sendStatus(401);
   }
@@ -15,7 +17,12 @@ router.get('/', verifyToken, (req, res) => {
     if (err) {
       res.sendStatus(500);
     }
-    res.json({ userList });
+    if (!prefix) {
+      res.json({ userList });
+    }
+
+    const filteredUserList = userList.filter((key) => key.includes(prefix));
+    res.json({ userList: filteredUserList });
   });
 });
 
