@@ -42,7 +42,7 @@ router.post('/signup', (req, res) => {
     }
 
     if (found.length > 0) {
-      return res.sendStatus(400);
+      return res.status(400).json({ error: 'User exists' });
     }
 
     const salt = bcrypt.genSaltSync(10);
