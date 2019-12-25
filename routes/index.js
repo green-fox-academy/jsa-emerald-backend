@@ -14,7 +14,7 @@ router.get('*', (req, res) => {
   res.sendStatus(404);
 });
 
-router.post('/register', (req, res) => {
+router.post('/users/signup', (req, res) => {
   if (req.body.email !== '' && req.body.password !== '') {
     res.json({
       accessToken: '0xa143981f3ec758296a1575146eab03ef047b7e40',
