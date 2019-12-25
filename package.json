@@ -8,6 +8,7 @@
     "lint": "eslint . --ext .js"
   },
   "dependencies": {
+    "bcrypt": "^3.0.7",
     "cors": "^2.8.5",
     "debug": "~2.6.9",
     "dotenv": "^8.2.0",
