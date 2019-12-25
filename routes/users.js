@@ -49,6 +49,7 @@ router.post('/signup', (req, res) => {
     const hashedPass = bcrypt.hashSync(password, salt);
     const newUser = new Users({ username, email, hashedPass });
     const token = jwt.sign({ username, email }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
     newUser.save((error) => {
       if (error) {
         debug(error);
@@ -56,6 +57,8 @@ router.post('/signup', (req, res) => {
       }
       return res.json({ authData: token });
     });
+
+    return null;
   });
 });
 
