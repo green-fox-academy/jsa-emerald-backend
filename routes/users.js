@@ -1,6 +1,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const { redisClient } = require('../redisDB');
+const { mongoose } = require('../mongoDB');
+const { usersBasic } = require('../Models/Users');
 const { verifyToken } = require('../Utils/Auth');
 
 const router = express.Router();
@@ -13,16 +14,18 @@ router.get('/', verifyToken, (req, res) => {
     res.sendStatus(401);
   }
 
-  redisClient.keys('*', (err, userList) => {
+  const Users = mongoose.model('Users', usersBasic);
+  Users.find((err, userList) => {
     if (err) {
-      res.sendStatus(500);
-    }
-    if (!prefix) {
-      res.json({ userList });
+      return res.sendStatus(500);
     }
 
-    const filteredUserList = userList.filter((key) => key.includes(prefix));
-    res.json({ userList: filteredUserList });
+    if (!prefix) {
+      return res.json({ userList });
+    }
+
+    const filteredUserList = userList.filter((user) => user.username.includes(prefix));
+    return res.json({ userList: filteredUserList });
   });
 });
 
