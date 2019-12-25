@@ -1,10 +1,10 @@
 const express = require('express');
-const { redisClient } = require('../redisDB');
+const { mongoose } = require('../mongoDB');
 
 const router = express.Router();
 
 router.get('/heartbeat', (req, res) => {
-  if (redisClient.connected) {
+  if (mongoose.connection.readyState === 1) {
     return res.sendStatus(200);
   }
   return res.sendStatus(500);
