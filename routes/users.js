@@ -1,10 +1,13 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
 const debug = require('debug')('Emerald:Users');
+const bcrypt = require('bcrypt');
 const { mongoose } = require('../mongoDB');
 const { usersBasic } = require('../Models/Users');
-const { verifyToken } = require('../Utils/Auth');
+
+const {
+  verifyToken, passwordHash, getTokenSet,
+} = require('../Utils/Auth');
 
 const router = express.Router();
 
@@ -45,20 +48,39 @@ router.post('/signup', (req, res) => {
       return res.status(400).json({ error: 'User exists' });
     }
 
-    const salt = bcrypt.genSaltSync(10);
-    const hashedPass = bcrypt.hashSync(password, salt);
+    const hashedPass = passwordHash(password);
     const newUser = new Users({ username, email, hashedPass });
-    const token = jwt.sign({ username, email }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
     newUser.save((error) => {
       if (error) {
         debug(error);
         return res.sendStatus(500);
       }
-      return res.json({ authData: token });
+      return res.json(getTokenSet({ username, email }));
     });
 
     return null;
+  });
+});
+
+router.post('/signin', (req, res) => {
+  const { email, password } = req.body;
+  const Users = mongoose.model('Users', usersBasic);
+  Users.find({ email }, (err, found) => {
+    if (err) {
+      debug(err);
+      return res.sendStatus(500);
+    }
+
+    if (found.length === 0) {
+      return res.status(400).json({ error: 'No User Found' });
+    }
+
+    if (!bcrypt.compareSync(password, found[0].hashedPass)) {
+      return res.status(400).json({ error: 'Incorrect Password' });
+    }
+
+    return res.json(getTokenSet({ username: found[0].username, email: found[0].email }));
   });
 });
 
