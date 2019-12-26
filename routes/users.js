@@ -45,7 +45,7 @@ router.post('/signup', (req, res) => {
     }
 
     if (found.length > 0) {
-      return res.status(400).json({ error: 'User exists' });
+      return res.status(401).json({ error: 'User exists' });
     }
 
     const hashedPass = passwordHash(password);
@@ -73,11 +73,11 @@ router.post('/signin', (req, res) => {
     }
 
     if (found.length === 0) {
-      return res.status(400).json({ error: 'No User Found' });
+      return res.status(401).json({ error: 'No User Found' });
     }
 
     if (!bcrypt.compareSync(password, found[0].hashedPass)) {
-      return res.status(400).json({ error: 'Incorrect Password' });
+      return res.status(401).json({ error: 'Incorrect Password' });
     }
 
     return res.json(getTokenSet({ username: found[0].username, email: found[0].email }));
