@@ -51,12 +51,13 @@ router.post('/signup', (req, res) => {
     const hashedPass = passwordHash(password);
     const newUser = new Users({ username, email, hashedPass });
 
-    newUser.save((error) => {
+    newUser.save((error, saved) => {
       if (error) {
         debug(error);
         return res.sendStatus(500);
       }
-      return res.json(getTokenSet({ username, email }));
+
+      return res.json(getTokenSet({ username, email, id: saved.id }));
     });
 
     return null;
@@ -80,7 +81,11 @@ router.post('/signin', (req, res) => {
       return res.status(401).json({ error: 'Incorrect Password' });
     }
 
-    return res.json(getTokenSet({ username: found[0].username, email: found[0].email }));
+    return res.json(getTokenSet({
+      username: found[0].username,
+      email: found[0].email,
+      id: found[0].id,
+    }));
   });
 });
 
