@@ -4,6 +4,7 @@ const debug = require('debug')('Emerald:Index');
 const { mongoose } = require('../mongoDB');
 const { verifyToken } = require('../Utils/Auth');
 const { families } = require('../Models/Families');
+const nodeMailer = require('../Utils/Email');
 
 const router = express.Router();
 
@@ -55,7 +56,19 @@ router.post('/family', verifyToken, async (req, res) => {
       debug(err);
       return res.sendStatus(500);
     }
-    return res.sendStatus(200);
+
+    nodeMailer.sendMail({
+      to: filteredMembers.map((user) => user.email),
+      subject: 'New Family Group From Money Honey',
+      body: '',
+    }, (error, info) => {
+      if (error) {
+        debug(error);
+        return res.sendStatus(500);
+      }
+      debug('Message %s sent: %s', info.messageId, info.response);
+      return res.sendStatus(200);
+    });
   });
   return null;
 });
