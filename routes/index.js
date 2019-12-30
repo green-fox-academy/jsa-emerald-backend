@@ -69,6 +69,7 @@ router.post('/family', verifyToken, async (req, res) => {
       debug('Message %s sent: %s', info.messageId, info.response);
       return res.sendStatus(200);
     });
+    return null;
   });
   return null;
 });
