@@ -6,6 +6,7 @@ const { verifyToken } = require('../Utils/Auth');
 const { families } = require('../Models/Families');
 const nodeMailer = require('../Utils/Email');
 const { usersBasic } = require('../Models/Users');
+const { transaction } = require('../Models/Transaction');
 
 const router = express.Router();
 
@@ -73,6 +74,44 @@ router.post('/family', verifyToken, async (req, res) => {
     });
     return null;
   });
+  return null;
+});
+
+router.post('/family-transactions', verifyToken, async (req, res) => {
+  const decoded = jwt.verify(req.token, process.env.JWT_SECRET);
+  if (!decoded) {
+    return res.sendStatus(401);
+  }
+
+  const {
+    amount, labelName, date, type,
+  } = req.body;
+
+  if (!amount || !labelName || !date || !type) {
+    return res.sendStatus(400);
+  }
+
+  const Families = mongoose.model('families', families);
+  const family = await Families.findOne({
+    $or: [{ members: decoded.id },
+      { creator: decoded.id }],
+  });
+  if (!family.transactions) {
+    family.transactions = [];
+  }
+
+  const Transaction = mongoose.model('transaction', transaction);
+  family.transactions.push(new Transaction({
+    creator: decoded.id, amount, labelName, date, type,
+  }));
+  family.save((err) => {
+    if (err) {
+      debug(err);
+      return res.sendStatus(500);
+    }
+    return res.sendStatus(200);
+  });
+
   return null;
 });
 
