@@ -27,7 +27,7 @@ router.get('/heartbeat', (req, res) => {
 router.post('/backup', verifyToken, (req, res) => {
   const decoded = jwt.verify(req.token, process.env.JWT_SECRET);
   const { username } = decoded;
-  const transactions = req.body;
+  const { transactions } = req.body;
   if (!decoded) {
     return res.sendStatus(401);
   }
@@ -50,6 +50,24 @@ router.post('/backup', verifyToken, (req, res) => {
       return res.sendStatus(200);
     },
   );
+  return null;
+});
+
+router.get('/restore', verifyToken, (req, res) => {
+  const decoded = jwt.verify(req.token, process.env.JWT_SECRET);
+  const { username } = decoded;
+  if (!decoded) {
+    return res.sendStatus(401);
+  }
+  const Users = mongoose.model('Users', usersFull);
+  Users.findOne({ username }, (err, found) => {
+    if (err) {
+      debug(err);
+      return res.sendStatus(500);
+    }
+    const { transactions } = found;
+    return res.json(transactions[0]);
+  });
   return null;
 });
 
