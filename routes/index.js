@@ -1,12 +1,18 @@
 const express = require('express');
-const jwt = require('jsonwebtoken');
-const debug = require('debug')('Emerald:Index');
+const debug = require('debug')('Emerald:Users');
 const { mongoose } = require('../mongoDB');
+<<<<<<< HEAD
 const { verifyToken } = require('../Utils/Auth');
 const { families } = require('../Models/Families');
 const nodeMailer = require('../Utils/Email');
 const { usersBasic } = require('../Models/Users');
 const { transaction } = require('../Models/Transaction');
+=======
+const { usersFull } = require('../Models/Users');
+const {
+  verifyToken, passwordHash, getTokenSet,
+} = require('../Utils/Auth');
+>>>>>>> JSAEM2-10 fixed: fix bcrypt bug
 
 const router = express.Router();
 
@@ -17,8 +23,15 @@ router.get('/heartbeat', (req, res) => {
   return res.sendStatus(500);
 });
 
-router.post('/backup', (req, res) => {
+router.post('/backup', verifyToken, (req, res) => {
+  const decoded = jwt.verify(req.token, process.env.JWT_SECRET);
+  const { username } = decoded;
   const transactions = req.body;
+  const Users = mongoose.model('Users', usersFull);
+  Users.find((err, userList) => {
+
+  });
+
   if (transactions.length) {
     return res.sendStatus(200);
   }

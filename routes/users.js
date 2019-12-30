@@ -56,8 +56,7 @@ router.post('/signup', (req, res) => {
         debug(error);
         return res.sendStatus(500);
       }
-
-      return res.json(getTokenSet({ username, email, id: saved.id }));
+      return res.json(getTokenSet({ username, email }));
     });
 
     return null;
@@ -81,11 +80,7 @@ router.post('/signin', (req, res) => {
       return res.status(401).json({ error: 'Incorrect Password' });
     }
 
-    return res.json(getTokenSet({
-      username: found[0].username,
-      email: found[0].email,
-      id: found[0].id,
-    }));
+    return res.json(getTokenSet({ username: found[0].username, email: found[0].email }));
   });
 });
 
