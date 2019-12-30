@@ -5,6 +5,7 @@ const { mongoose } = require('../mongoDB');
 const { verifyToken } = require('../Utils/Auth');
 const { families } = require('../Models/Families');
 const nodeMailer = require('../Utils/Email');
+const { usersBasic } = require('../Models/Users');
 
 const router = express.Router();
 
@@ -34,18 +35,19 @@ router.post('/family', verifyToken, async (req, res) => {
     return res.sendStatus(400);
   }
 
-  const memberList = members.split(',').map((id) => mongoose.Schema.Types.ObjectId(id));
+  const memberList = members.split(',').map((id) => mongoose.Types.ObjectId(id));
   if (memberList.length === 0) {
     return res.sendStatus(400);
   }
 
-  const Families = mongoose.model('families', families);
-  const filteredMembers = await Families.find({ _id: { $in: memberList } });
+  const Users = mongoose.model('Users', usersBasic);
+  const filteredMembers = await Users.find({ _id: { $in: memberList } });
 
   if (filteredMembers.length === 0) {
     return res.sendStatus(400);
   }
 
+  const Families = mongoose.model('families', families);
   const newFamily = new Families({
     creator: decoded.id,
     members: filteredMembers.map((user) => user.id),

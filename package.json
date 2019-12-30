@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "nodemon app.js",
-    "start:dev": "DEBUG=Emerald* nodemon app.js",
+    "dev": "DEBUG=Emerald* nodemon app.js",
     "lint": "eslint . --ext .js"
   },
   "dependencies": {
