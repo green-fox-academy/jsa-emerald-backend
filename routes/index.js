@@ -27,6 +27,7 @@ router.post('/backup', verifyToken, (req, res) => {
   }
   const { username } = decoded;
   const transactions = req.body;
+
   if (!decoded) {
     return res.sendStatus(401);
   }
