@@ -7,6 +7,7 @@ const { families } = require('../Models/Families');
 const nodeMailer = require('../Utils/Email');
 const { usersBasic } = require('../Models/Users');
 const { transaction } = require('../Models/Transaction');
+const { usersFull } = require('../Models/Users');
 
 const router = express.Router();
 
@@ -17,12 +18,62 @@ router.get('/heartbeat', (req, res) => {
   return res.sendStatus(500);
 });
 
-router.post('/backup', (req, res) => {
-  const transactions = req.body;
-  if (transactions.length) {
-    return res.sendStatus(200);
+router.post('/backup', verifyToken, (req, res) => {
+  let decoded;
+  try {
+    decoded = jwt.verify(req.token, process.env.JWT_SECRET);
+  } catch (err) {
+    return res.sendStatus(401);
   }
-  return res.sendStatus(404);
+  const { username } = decoded;
+  const transactions = req.body;
+
+  if (!decoded) {
+    return res.sendStatus(401);
+  }
+  if (!transactions) {
+    return res.sendStatus(400);
+  }
+  const newUsers = mongoose.model('Users', usersFull);
+  newUsers.updateOne(
+    { username },
+    {
+      $set: {
+        transactions,
+      },
+    },
+    (err) => {
+      if (err) {
+        debug(err);
+        return res.sendStatus(500);
+      }
+      return res.sendStatus(200);
+    },
+  );
+  return null;
+});
+
+router.get('/restore', verifyToken, (req, res) => {
+  let decoded;
+  try {
+    decoded = jwt.verify(req.token, process.env.JWT_SECRET);
+  } catch (err) {
+    return res.sendStatus(401);
+  }
+  const { username } = decoded;
+  if (!decoded) {
+    return res.sendStatus(401);
+  }
+  const newUsers = mongoose.model('Users', usersFull);
+  newUsers.findOne({ username }, (err, found) => {
+    if (err) {
+      debug(err);
+      return res.sendStatus(500);
+    }
+    const { transactions } = found;
+    return res.json(transactions);
+  });
+  return null;
 });
 
 router.post('/family', verifyToken, async (req, res) => {

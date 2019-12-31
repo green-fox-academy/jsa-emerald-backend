@@ -56,7 +56,6 @@ router.post('/signup', (req, res) => {
         debug(error);
         return res.sendStatus(500);
       }
-
       return res.json(getTokenSet({ username, email, id: saved.id }));
     });
 
