@@ -2,18 +2,12 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const debug = require('debug')('Emerald:Users');
 const { mongoose } = require('../mongoDB');
-<<<<<<< HEAD
 const { verifyToken } = require('../Utils/Auth');
 const { families } = require('../Models/Families');
 const nodeMailer = require('../Utils/Email');
 const { usersBasic } = require('../Models/Users');
 const { transaction } = require('../Models/Transaction');
-=======
 const { usersFull } = require('../Models/Users');
-const {
-  verifyToken,
-} = require('../Utils/Auth');
->>>>>>> JSAEM2-10 fixed: fix bcrypt bug
 
 const router = express.Router();
 
@@ -32,9 +26,7 @@ router.post('/backup', verifyToken, (req, res) => {
     return res.sendStatus(401);
   }
   const { username } = decoded;
-  const { transactions } = req.body;
-  console.log(transactions);
-
+  const transactions = req.body;
   if (!decoded) {
     return res.sendStatus(401);
   }
@@ -78,7 +70,7 @@ router.get('/restore', verifyToken, (req, res) => {
       return res.sendStatus(500);
     }
     const { transactions } = found;
-    return res.json(transactions[0]);
+    return res.json(transactions);
   });
   return null;
 });
