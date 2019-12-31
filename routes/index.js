@@ -1,6 +1,6 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const debug = require('debug')('Emerald:Users');
+const debug = require('debug')('Emerald:Index');
 const { mongoose } = require('../mongoDB');
 const { verifyToken } = require('../Utils/Auth');
 const { families } = require('../Models/Families');
