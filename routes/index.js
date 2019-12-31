@@ -25,17 +25,24 @@ router.get('/heartbeat', (req, res) => {
 });
 
 router.post('/backup', verifyToken, (req, res) => {
-  const decoded = jwt.verify(req.token, process.env.JWT_SECRET);
+  let decoded;
+  try {
+    decoded = jwt.verify(req.token, process.env.JWT_SECRET);
+  } catch (err) {
+    return res.sendStatus(401);
+  }
   const { username } = decoded;
   const { transactions } = req.body;
+  console.log(transactions);
+
   if (!decoded) {
     return res.sendStatus(401);
   }
   if (!transactions) {
     return res.sendStatus(400);
   }
-  const Users = mongoose.model('Users', usersFull);
-  Users.updateOne(
+  const newUsers = mongoose.model('Users', usersFull);
+  newUsers.updateOne(
     { username },
     {
       $set: {
@@ -54,13 +61,18 @@ router.post('/backup', verifyToken, (req, res) => {
 });
 
 router.get('/restore', verifyToken, (req, res) => {
-  const decoded = jwt.verify(req.token, process.env.JWT_SECRET);
+  let decoded;
+  try {
+    decoded = jwt.verify(req.token, process.env.JWT_SECRET);
+  } catch (err) {
+    return res.sendStatus(401);
+  }
   const { username } = decoded;
   if (!decoded) {
     return res.sendStatus(401);
   }
-  const Users = mongoose.model('Users', usersFull);
-  Users.findOne({ username }, (err, found) => {
+  const newUsers = mongoose.model('Users', usersFull);
+  newUsers.findOne({ username }, (err, found) => {
     if (err) {
       debug(err);
       return res.sendStatus(500);
