@@ -26,11 +26,16 @@ router.post('/backup', (req, res) => {
 });
 
 router.post('/family', verifyToken, async (req, res) => {
-  const decoded = jwt.verify(req.token, process.env.JWT_SECRET);
-  if (!decoded) {
+  let decoded;
+  try {
+    decoded = jwt.verify(req.token, process.env.JWT_SECRET);
+  } catch (err) {
     return res.sendStatus(401);
   }
 
+  if (!decoded) {
+    return res.sendStatus(401);
+  }
   const { members } = req.body;
   if (!members) {
     return res.sendStatus(400);
@@ -78,7 +83,13 @@ router.post('/family', verifyToken, async (req, res) => {
 });
 
 router.post('/family-transactions', verifyToken, async (req, res) => {
-  const decoded = jwt.verify(req.token, process.env.JWT_SECRET);
+  let decoded;
+  try {
+    decoded = jwt.verify(req.token, process.env.JWT_SECRET);
+  } catch (err) {
+    return res.sendStatus(401);
+  }
+
   if (!decoded) {
     return res.sendStatus(401);
   }
@@ -113,6 +124,35 @@ router.post('/family-transactions', verifyToken, async (req, res) => {
   });
 
   return null;
+});
+
+router.get('/family-transactions', verifyToken, async (req, res) => {
+  let decoded;
+  try {
+    decoded = jwt.verify(req.token, process.env.JWT_SECRET);
+  } catch (err) {
+    return res.sendStatus(401);
+  }
+
+  if (!decoded) {
+    return res.sendStatus(401);
+  }
+
+  const Families = mongoose.model('families', families);
+  const family = await Families.findOne({
+    $or: [{ members: decoded.id },
+      { creator: decoded.id }],
+  });
+
+  if (!family) {
+    return res.json([]);
+  }
+
+  if (!family.transactions) {
+    family.transactions = [];
+  }
+
+  return res.json(family.transactions);
 });
 
 module.exports = router;
