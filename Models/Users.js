@@ -1,12 +1,6 @@
 const { mongoose } = require('../mongoDB');
 
-const usersBasic = new mongoose.Schema({
-  username: String,
-  email: String,
-  hashedPass: String,
-});
-
-const usersFull = new mongoose.Schema({
+const users = new mongoose.Schema({
   username: String,
   email: String,
   hashedPass: String,
@@ -14,4 +8,4 @@ const usersFull = new mongoose.Schema({
   cusLabels: Array,
 });
 
-module.exports = { usersBasic, usersFull };
+module.exports = mongoose.model('users', users);

@@ -1,6 +1,6 @@
 const { mongoose } = require('../mongoDB');
 
-const transaction = new mongoose.Schema({
+const transactions = new mongoose.Schema({
   creator: mongoose.Schema.Types.ObjectId,
   amount: Number,
   labelName: String,
@@ -8,4 +8,4 @@ const transaction = new mongoose.Schema({
   type: String,
 });
 
-module.exports = { transaction };
+module.exports = mongoose.model('transactions', transactions);

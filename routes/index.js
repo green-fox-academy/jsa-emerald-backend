@@ -3,11 +3,10 @@ const jwt = require('jsonwebtoken');
 const debug = require('debug')('Emerald:Index');
 const { mongoose } = require('../mongoDB');
 const { verifyToken } = require('../Utils/Auth');
-const { families } = require('../Models/Families');
+const Families = require('../Models/Families');
 const nodeMailer = require('../Utils/Email');
-const { usersBasic } = require('../Models/Users');
-const { transaction } = require('../Models/Transaction');
-const { usersFull } = require('../Models/Users');
+const Users = require('../Models/Users');
+const Transactions = require('../Models/Transaction');
 
 const router = express.Router();
 
@@ -34,8 +33,8 @@ router.post('/backup', verifyToken, (req, res) => {
   if (!transactions) {
     return res.sendStatus(400);
   }
-  const newUsers = mongoose.model('Users', usersFull);
-  newUsers.updateOne(
+
+  Users.updateOne(
     { username },
     {
       $set: {
@@ -64,8 +63,8 @@ router.get('/restore', verifyToken, (req, res) => {
   if (!decoded) {
     return res.sendStatus(401);
   }
-  const newUsers = mongoose.model('Users', usersFull);
-  newUsers.findOne({ username }, (err, found) => {
+
+  Users.findOne({ username }, (err, found) => {
     if (err) {
       debug(err);
       return res.sendStatus(500);
@@ -97,14 +96,12 @@ router.post('/family', verifyToken, async (req, res) => {
     return res.sendStatus(400);
   }
 
-  const Users = mongoose.model('Users', usersBasic);
   const filteredMembers = await Users.find({ _id: { $in: memberList } });
 
   if (filteredMembers.length === 0) {
     return res.sendStatus(400);
   }
 
-  const Families = mongoose.model('families', families);
   const newFamily = new Families({
     creator: decoded.id,
     members: filteredMembers.map((user) => user.id),
@@ -153,7 +150,6 @@ router.post('/family-transactions', verifyToken, async (req, res) => {
     return res.sendStatus(400);
   }
 
-  const Families = mongoose.model('families', families);
   const family = await Families.findOne({
     $or: [{ members: decoded.id },
       { creator: decoded.id }],
@@ -162,8 +158,7 @@ router.post('/family-transactions', verifyToken, async (req, res) => {
     family.transactions = [];
   }
 
-  const Transaction = mongoose.model('transaction', transaction);
-  family.transactions.push(new Transaction({
+  family.transactions.push(new Transactions({
     creator: decoded.id, amount, labelName, date, type,
   }));
   family.save((err) => {
@@ -189,7 +184,6 @@ router.get('/family-transactions', verifyToken, async (req, res) => {
     return res.sendStatus(401);
   }
 
-  const Families = mongoose.model('families', families);
   const family = await Families.findOne({
     $or: [{ members: decoded.id },
       { creator: decoded.id }],

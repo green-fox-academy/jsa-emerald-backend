@@ -2,8 +2,7 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const debug = require('debug')('Emerald:Users');
 const bcrypt = require('bcrypt');
-const { mongoose } = require('../mongoDB');
-const { usersBasic } = require('../Models/Users');
+const Users = require('../Models/Users');
 
 const {
   verifyToken, passwordHash, getTokenSet,
@@ -19,7 +18,6 @@ router.get('/', verifyToken, (req, res) => {
     res.sendStatus(401);
   }
 
-  const Users = mongoose.model('Users', usersBasic);
   Users.find((err, userList) => {
     if (err) {
       debug(err);
@@ -37,7 +35,6 @@ router.get('/', verifyToken, (req, res) => {
 
 router.post('/signup', (req, res) => {
   const { username, email, password } = req.body;
-  const Users = mongoose.model('Users', usersBasic);
   Users.find({ username, email }, (err, found) => {
     if (err) {
       debug(err);
@@ -65,7 +62,6 @@ router.post('/signup', (req, res) => {
 
 router.post('/signin', (req, res) => {
   const { email, password } = req.body;
-  const Users = mongoose.model('Users', usersBasic);
   Users.find({ email }, (err, found) => {
     if (err) {
       debug(err);
