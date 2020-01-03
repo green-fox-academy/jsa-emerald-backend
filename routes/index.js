@@ -1,10 +1,10 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const debug = require('debug')('Emerald:Index');
-const { mongoose } = require('../mongoDB');
+const nodeMailer = require('nodemailer');
+const mongoose = require('mongoose');
 const { verifyToken } = require('../Utils/Auth');
 const Families = require('../Models/Families');
-const nodeMailer = require('../Utils/Email');
 const Users = require('../Models/Users');
 const Transactions = require('../Models/Transaction');
 
@@ -113,7 +113,17 @@ router.post('/family', verifyToken, async (req, res) => {
       return res.sendStatus(500);
     }
 
-    nodeMailer.sendMail({
+    const mailer = nodeMailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    mailer.sendMail({
       to: filteredMembers.map((user) => user.email),
       subject: 'New Family Group From Money Honey',
       body: '',

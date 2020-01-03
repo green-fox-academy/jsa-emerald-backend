@@ -1,4 +1,4 @@
-const { mongoose } = require('../mongoDB');
+const mongoose = require('mongoose');
 
 const families = new mongoose.Schema({
   members: Array,

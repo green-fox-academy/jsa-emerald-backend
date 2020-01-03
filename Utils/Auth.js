@@ -24,18 +24,19 @@ const passwordHash = (password) => {
   return bcrypt.hashSync(password, salt);
 };
 
-const signature60min = (obj) => jwt.sign(obj, process.env.JWT_SECRET, { expiresIn: '1h' });
+const signature60min = (obj, secret) => jwt.sign(obj, secret, { expiresIn: '1h' });
 
-const signature30day = (obj) => jwt.sign(obj, process.env.JWT_SECRET, { expiresIn: '30d' });
+const signature30day = (obj, secret) => jwt.sign(obj, secret, { expiresIn: '30d' });
 
-const getTokenSet = (obj) => ({
-  accessToken: signature60min(obj),
+const getTokenSet = (obj, secret) => ({
+  accessToken: signature60min(obj, secret),
   accessTokenExpiresAt: moment().add(1, 'hours').format(),
-  refreshToken: signature30day(obj),
+  refreshToken: signature30day(obj, secret),
   refreshTokenExpiresAt: moment().add(30, 'days').format(),
 });
 
 module.exports = {
+  getReqToken,
   verifyToken,
   passwordHash,
   signature60min,
