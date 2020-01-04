@@ -1,6 +1,5 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const debug = require('debug')('Emerald:Users');
 const bcrypt = require('bcrypt');
 const Users = require('../Models/Users');
 const {
@@ -15,7 +14,6 @@ router.get('/', verifyToken, (req, res) => {
 
   Users.find((err, userList) => {
     if (err) {
-      debug(err);
       return res.sendStatus(500);
     }
 
@@ -36,7 +34,6 @@ router.post('/signup', (req, res) => {
 
   Users.find({ username, email }, (err, found) => {
     if (err) {
-      debug(err);
       return res.sendStatus(500);
     }
 
@@ -49,7 +46,6 @@ router.post('/signup', (req, res) => {
 
     newUser.save((error, saved) => {
       if (error) {
-        debug(error);
         return res.sendStatus(500);
       }
       return res.json(getTokenSet({ username, email, id: saved.id }, process.env.JWT_SECRET));
@@ -69,7 +65,6 @@ router.post('/signin', (req, res) => {
 
   Users.find({ email }, (err, found) => {
     if (err) {
-      debug(err);
       return res.sendStatus(500);
     }
 

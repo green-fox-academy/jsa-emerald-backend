@@ -1,6 +1,5 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const debug = require('debug')('Emerald:Index');
 // const nodeMailer = require('nodemailer');
 const mongoose = require('mongoose');
 const { verifyToken } = require('../Utils/Auth');
@@ -25,11 +24,8 @@ router.post('/backup', verifyToken, (req, res) => {
     return res.sendStatus(401);
   }
   const { username } = decoded;
-  const transactions = req.body;
+  const { transactions } = req.body;
 
-  if (!decoded) {
-    return res.sendStatus(401);
-  }
   if (!transactions) {
     return res.sendStatus(400);
   }
@@ -43,7 +39,6 @@ router.post('/backup', verifyToken, (req, res) => {
     },
     (err) => {
       if (err) {
-        debug(err);
         return res.sendStatus(500);
       }
       return res.sendStatus(200);
@@ -60,13 +55,9 @@ router.get('/restore', verifyToken, (req, res) => {
     return res.sendStatus(401);
   }
   const { username } = decoded;
-  if (!decoded) {
-    return res.sendStatus(401);
-  }
 
   Users.findOne({ username }, (err, found) => {
     if (err) {
-      debug(err);
       return res.sendStatus(500);
     }
     const { transactions } = found;
@@ -83,7 +74,14 @@ router.post('/family', verifyToken, async (req, res) => {
     return res.sendStatus(400);
   }
 
-  const memberList = members.split(',').map((id) => mongoose.Types.ObjectId(id));
+  const memberList = members.split(',').map((id) => {
+    try {
+      return mongoose.Types.ObjectId(id);
+    } catch (err) {
+      return null;
+    }
+  }).filter((i) => i);
+
   if (memberList.length === 0) {
     return res.sendStatus(400);
   }
@@ -101,7 +99,6 @@ router.post('/family', verifyToken, async (req, res) => {
 
   newFamily.save((err) => {
     if (err) {
-      debug(err);
       return res.sendStatus(500);
     }
 
@@ -152,16 +149,13 @@ router.post('/family-transactions', verifyToken, async (req, res) => {
     $or: [{ members: decoded.id },
       { creator: decoded.id }],
   });
-  if (!family.transactions) {
-    family.transactions = [];
-  }
 
   family.transactions.push(new Transactions({
     creator: decoded.id, amount, labelName, date, type,
   }));
+
   family.save((err) => {
     if (err) {
-      debug(err);
       return res.sendStatus(500);
     }
     return res.sendStatus(200);
@@ -185,10 +179,6 @@ router.get('/family-transactions', verifyToken, async (req, res) => {
 
   if (!family) {
     return res.json([]);
-  }
-
-  if (!family.transactions) {
-    family.transactions = [];
   }
 
   return res.json(family.transactions);

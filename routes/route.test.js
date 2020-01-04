@@ -4,10 +4,6 @@ const jwt = require('jsonwebtoken');
 const app = require('../app');
 require('dotenv').config();
 
-const databaseName = 'test';
-const user = 'root';
-const pass = 'example';
-
 const Users = require('../Models/Users');
 const Families = require('../Models/Families');
 
@@ -16,7 +12,7 @@ let mikeID;
 const expiredToken = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Ijc4OSIsImVtYWlsIjoiNzg5QGdtYWlsLmNvbSIsImlhdCI6MTU3NzcwMDA2MiwiZXhwIjoxNTc3NzAzNjYyfQ.p3a41KIHC2GtTNchEdsSPwlz0xJIjm2YzZU7yVBmjhg';
 
 const testDBInit = async () => {
-  const url = `mongodb://${user}:${pass}@localhost/${databaseName}`;
+  const url = `mongodb://${process.env.DB_USER}:${process.env.DB_PASS}@localhost/${process.env.DB_DATABASE}`;
   await mongoose.connect(url, {
     useNewUrlParser: true,
     useCreateIndex: true,
@@ -80,15 +76,6 @@ describe('Users Route', () => {
     expect(res.statusCode).toEqual(401);
   });
 
-  it('create User with DB issue', async () => {
-    mongoose.connection.close();
-    const res = await request(app)
-      .post('/users/signup')
-      .send({ username: 'john', email: 'john@gmail.com', password: '12345678' });
-    expect(res.statusCode).toEqual(500);
-    await testDBInit();
-  });
-
   it('sign in with no parameters', async () => {
     const res = await request(app)
       .post('/users/signin');
@@ -132,15 +119,6 @@ describe('Users Route', () => {
     expect(res.statusCode).toEqual(401);
   });
 
-  it('sign in with DB issue', async () => {
-    mongoose.connection.close();
-    const res = await request(app)
-      .post('/users/signin')
-      .send({ email: 'john@gmail.com', password: '12345678' });
-    expect(res.statusCode).toEqual(500);
-    await testDBInit();
-  });
-
   it('get user list without token', async () => {
     const res = await request(app)
       .get('/users');
@@ -174,8 +152,26 @@ describe('Users Route', () => {
     expect(res.body.userList[0].username).toEqual('john');
   });
 
+  it('create User with DB issue', async () => {
+    mongoose.connection.close(true);
+    const res = await request(app)
+      .post('/users/signup')
+      .send({ username: 'john', email: 'john@gmail.com', password: '12345678' });
+    expect(res.statusCode).toEqual(500);
+    await testDBInit();
+  });
+
+  it('sign in with DB issue', async () => {
+    mongoose.connection.close(true);
+    const res = await request(app)
+      .post('/users/signin')
+      .send({ email: 'john@gmail.com', password: '12345678' });
+    expect(res.statusCode).toEqual(500);
+    await testDBInit();
+  });
+
   it('get user with DB issue', async () => {
-    mongoose.connection.close();
+    mongoose.connection.close(true);
     const token = `Bearer ${accessToken}`;
     const res = await request(app)
       .get('/users')
@@ -198,18 +194,27 @@ describe('Users Route', () => {
     expect(res.statusCode).toEqual(404);
   });
 
-  it('Heartbeat Test Correct', async () => {
-    const res = await request(app)
-      .get('/heartbeat');
-    expect(res.statusCode).toEqual(200);
-  });
-
   it('Heartbeat Test Failed', async () => {
     mongoose.connection.close();
     const res = await request(app)
       .get('/heartbeat');
     expect(res.statusCode).toEqual(500);
     await testDBInit();
+  });
+
+  it('Heartbeat Test Correct', async () => {
+    const res = await request(app)
+      .get('/heartbeat');
+    expect(res.statusCode).toEqual(200);
+  });
+
+  it('Get Family Transaction', async () => {
+    const token = `Bearer ${accessToken}`;
+    const res = await request(app)
+      .get('/family-transactions')
+      .set('Authorization', token);
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.length).toEqual(0);
   });
 
   it('Family Formation without parameter', async () => {
@@ -229,6 +234,15 @@ describe('Users Route', () => {
     expect(res.statusCode).toEqual(400);
   });
 
+  it('Family Formation with invalid members', async () => {
+    const token = `Bearer ${accessToken}`;
+    const res = await request(app)
+      .post('/family')
+      .set('Authorization', token)
+      .send({ members: '123,123' });
+    expect(res.statusCode).toEqual(400);
+  });
+
   it('Family Formation with invalid member', async () => {
     const token = `Bearer ${accessToken}`;
     const res = await request(app)
@@ -236,6 +250,19 @@ describe('Users Route', () => {
       .set('Authorization', token)
       .send({ members: '507f1f77bcf86cd799439011,507f1f77bcf86cd799439011' });
     expect(res.statusCode).toEqual(400);
+  });
+
+  it('Family Formation with DB issue', async () => {
+    setTimeout(async () => {
+      mongoose.connection.close(true);
+      const token = `Bearer ${accessToken}`;
+      const res = await request(app)
+        .post('/family')
+        .set('Authorization', token)
+        .send({ members: mikeID });
+      expect(res.statusCode).toEqual(500);
+      await testDBInit();
+    }, 500);
   });
 
   it('Family Formation Success', async () => {
@@ -308,7 +335,7 @@ describe('Users Route', () => {
 
   it('Family Transaction Creation with DB issue', async () => {
     setTimeout(async () => {
-      mongoose.connection.close();
+      mongoose.connection.close(true);
       const token = `Bearer ${accessToken}`;
       const res = await request(app)
         .post('/family-transactions')
@@ -318,7 +345,20 @@ describe('Users Route', () => {
         });
       expect(res.statusCode).toEqual(200);
       await testDBInit();
-    }, 2000);
+    }, 500);
+  });
+
+  it('Get Family Transaction without token', async () => {
+    const res = await request(app)
+      .get('/family-transactions');
+    expect(res.statusCode).toEqual(401);
+  });
+
+  it('Get Family Transaction with expired token', async () => {
+    const res = await request(app)
+      .get('/family-transactions')
+      .set('Authorization', expiredToken);
+    expect(res.statusCode).toEqual(401);
   });
 
   it('Get Family Transaction', async () => {
@@ -332,7 +372,7 @@ describe('Users Route', () => {
 
   it('Get Family Transaction with DB issue', async () => {
     setTimeout(async () => {
-      mongoose.connection.close();
+      mongoose.connection.close(true);
       const token = `Bearer ${accessToken}`;
       const res = await request(app)
         .get('/family-transactions')
@@ -340,6 +380,78 @@ describe('Users Route', () => {
       expect(res.statusCode).toEqual(200);
       expect(res.body.length).toEqual(1);
       await testDBInit();
-    }, 2000);
+    }, 1000);
+  });
+
+  it('Restore without token', async () => {
+    const res = await request(app)
+      .get('/restore');
+    expect(res.statusCode).toEqual(401);
+  });
+
+  it('Restore with expired token', async () => {
+    const res = await request(app)
+      .get('/restore')
+      .set('Authorization', expiredToken);
+    expect(res.statusCode).toEqual(401);
+  });
+
+  it('Restore with valid user', async () => {
+    const token = `Bearer ${accessToken}`;
+    const res = await request(app)
+      .get('/restore')
+      .set('Authorization', token);
+    expect(res.statusCode).toEqual(200);
+  });
+
+  it('Backup without token', async () => {
+    const res = await request(app)
+      .post('/backup');
+    expect(res.statusCode).toEqual(401);
+  });
+
+  it('Backup with expired token', async () => {
+    const res = await request(app)
+      .post('/backup')
+      .set('Authorization', expiredToken);
+    expect(res.statusCode).toEqual(401);
+  });
+
+  it('Backup without parameter', async () => {
+    const token = `Bearer ${accessToken}`;
+    const res = await request(app)
+      .post('/backup')
+      .set('Authorization', token);
+    expect(res.statusCode).toEqual(400);
+  });
+
+  it('Backup with good parameter', async () => {
+    const token = `Bearer ${accessToken}`;
+    const res = await request(app)
+      .post('/backup')
+      .set('Authorization', token)
+      .send({ transactions: 'dummy' });
+    expect(res.statusCode).toEqual(200);
+  });
+
+  it('Backup with DB issue', async () => {
+    mongoose.connection.close(true);
+    const token = `Bearer ${accessToken}`;
+    const res = await request(app)
+      .post('/backup')
+      .set('Authorization', token)
+      .send({ transactions: 'dummy' });
+    expect(res.statusCode).toEqual(500);
+    await testDBInit();
+  });
+
+  it('Restore with DB issue', async () => {
+    mongoose.connection.close(true);
+    const token = `Bearer ${accessToken}`;
+    const res = await request(app)
+      .get('/restore')
+      .set('Authorization', token);
+    expect(res.statusCode).toEqual(500);
+    await testDBInit();
   });
 });

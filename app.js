@@ -9,9 +9,7 @@ const indexRouter = require('./routes/index');
 const userRouter = require('./routes/users');
 
 // DB Init
-if (!process.env.MODE || process.env.MODE !== 'TEST') {
-  mongooseInit();
-}
+mongooseInit();
 
 // middleware setup
 app.use(cors());
