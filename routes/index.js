@@ -1,7 +1,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const debug = require('debug')('Emerald:Index');
-const nodeMailer = require('nodemailer');
+// const nodeMailer = require('nodemailer');
 const mongoose = require('mongoose');
 const { verifyToken } = require('../Utils/Auth');
 const Families = require('../Models/Families');

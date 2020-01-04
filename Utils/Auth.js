@@ -16,7 +16,7 @@ const verifyToken = (req, res, next) => {
     return res.sendStatus(401);
   }
   req.token = token;
-  next();
+  return next();
 };
 
 const passwordHash = (password) => {
