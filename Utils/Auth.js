@@ -13,7 +13,7 @@ const getReqToken = (req) => {
 const verifyToken = (req, res, next) => {
   const token = getReqToken(req);
   if (token === '') {
-    res.sendStatus(401);
+    return res.sendStatus(401);
   }
   req.token = token;
   next();

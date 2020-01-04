@@ -76,16 +76,8 @@ router.get('/restore', verifyToken, (req, res) => {
 });
 
 router.post('/family', verifyToken, async (req, res) => {
-  let decoded;
-  try {
-    decoded = jwt.verify(req.token, process.env.JWT_SECRET);
-  } catch (err) {
-    return res.sendStatus(401);
-  }
+  const decoded = jwt.verify(req.token, process.env.JWT_SECRET);
 
-  if (!decoded) {
-    return res.sendStatus(401);
-  }
   const { members } = req.body;
   if (!members) {
     return res.sendStatus(400);
@@ -113,29 +105,29 @@ router.post('/family', verifyToken, async (req, res) => {
       return res.sendStatus(500);
     }
 
-    const mailer = nodeMailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 465,
-      secure: true,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
+    // const mailer = nodeMailer.createTransport({
+    //   host: 'smtp.gmail.com',
+    //   port: 465,
+    //   secure: true,
+    //   auth: {
+    //     user: process.env.EMAIL_USER,
+    //     pass: process.env.EMAIL_PASS,
+    //   },
+    // });
 
-    mailer.sendMail({
-      to: filteredMembers.map((user) => user.email),
-      subject: 'New Family Group From Money Honey',
-      body: '',
-    }, (error, info) => {
-      if (error) {
-        debug(error);
-        return res.sendStatus(500);
-      }
-      debug('Message %s sent: %s', info.messageId, info.response);
-      return res.sendStatus(200);
-    });
-    return null;
+    // mailer.sendMail({
+    //   to: filteredMembers.map((user) => user.email),
+    //   subject: 'New Family Group From Money Honey',
+    //   body: '',
+    // }, (error, info) => {
+    //   if (error) {
+    //     debug(error);
+    //     return res.sendStatus(500);
+    //   }
+    //   debug('Message %s sent: %s', info.messageId, info.response);
+    //   return res.sendStatus(200);
+    // });
+    return res.sendStatus(200);
   });
   return null;
 });
@@ -145,10 +137,6 @@ router.post('/family-transactions', verifyToken, async (req, res) => {
   try {
     decoded = jwt.verify(req.token, process.env.JWT_SECRET);
   } catch (err) {
-    return res.sendStatus(401);
-  }
-
-  if (!decoded) {
     return res.sendStatus(401);
   }
 
@@ -187,10 +175,6 @@ router.get('/family-transactions', verifyToken, async (req, res) => {
   try {
     decoded = jwt.verify(req.token, process.env.JWT_SECRET);
   } catch (err) {
-    return res.sendStatus(401);
-  }
-
-  if (!decoded) {
     return res.sendStatus(401);
   }
 
