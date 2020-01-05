@@ -1,13 +1,19 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
-// const nodeMailer = require('nodemailer');
 const mongoose = require('mongoose');
+const nodeMailerReal = require('nodemailer');
+const nodeMailerMock = require('nodemailer-mock');
 const { verifyToken } = require('../Utils/Auth');
 const Families = require('../Models/Families');
 const Users = require('../Models/Users');
 const Transactions = require('../Models/Transaction');
 
 const router = express.Router();
+
+let nodeMailer = nodeMailerReal;
+if (process.env.MODE && process.env.MODE === 'TEST') {
+  nodeMailer = nodeMailerMock;
+}
 
 router.get('/heartbeat', (req, res) => {
   if (mongoose.connection.readyState === 1) {
@@ -102,29 +108,22 @@ router.post('/family', verifyToken, async (req, res) => {
       return res.sendStatus(500);
     }
 
-    // const mailer = nodeMailer.createTransport({
-    //   host: 'smtp.gmail.com',
-    //   port: 465,
-    //   secure: true,
-    //   auth: {
-    //     user: process.env.EMAIL_USER,
-    //     pass: process.env.EMAIL_PASS,
-    //   },
-    // });
+    const mailer = nodeMailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
 
-    // mailer.sendMail({
-    //   to: filteredMembers.map((user) => user.email),
-    //   subject: 'New Family Group From Money Honey',
-    //   body: '',
-    // }, (error, info) => {
-    //   if (error) {
-    //     debug(error);
-    //     return res.sendStatus(500);
-    //   }
-    //   debug('Message %s sent: %s', info.messageId, info.response);
-    //   return res.sendStatus(200);
-    // });
-    return res.sendStatus(200);
+    mailer.sendMail({
+      to: filteredMembers.map((user) => user.email),
+      subject: 'New Family Group From Money Honey',
+      body: '',
+    }, () => res.sendStatus(200));
+    return null;
   });
   return null;
 });
