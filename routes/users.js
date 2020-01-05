@@ -1,9 +1,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const debug = require('debug')('Emerald:Users');
 const bcrypt = require('bcrypt');
 const Users = require('../Models/Users');
-
 const {
   verifyToken, passwordHash, getTokenSet,
 } = require('../Utils/Auth');
@@ -11,16 +9,11 @@ const {
 const router = express.Router();
 
 router.get('/', verifyToken, (req, res) => {
-  const decoded = jwt.verify(req.token, process.env.JWT_SECRET);
+  jwt.verify(req.token, process.env.JWT_SECRET);
   const { prefix } = req.query;
-
-  if (!decoded) {
-    res.sendStatus(401);
-  }
 
   Users.find((err, userList) => {
     if (err) {
-      debug(err);
       return res.sendStatus(500);
     }
 
@@ -35,9 +28,12 @@ router.get('/', verifyToken, (req, res) => {
 
 router.post('/signup', (req, res) => {
   const { username, email, password } = req.body;
+  if (!username || !email || !password) {
+    return res.sendStatus(400);
+  }
+
   Users.find({ username, email }, (err, found) => {
     if (err) {
-      debug(err);
       return res.sendStatus(500);
     }
 
@@ -50,21 +46,25 @@ router.post('/signup', (req, res) => {
 
     newUser.save((error, saved) => {
       if (error) {
-        debug(error);
         return res.sendStatus(500);
       }
-      return res.json(getTokenSet({ username, email, id: saved.id }));
+      return res.json(getTokenSet({ username, email, id: saved.id }, process.env.JWT_SECRET));
     });
 
     return null;
   });
+
+  return null;
 });
 
 router.post('/signin', (req, res) => {
   const { email, password } = req.body;
+  if (!email || !password) {
+    return res.sendStatus(400);
+  }
+
   Users.find({ email }, (err, found) => {
     if (err) {
-      debug(err);
       return res.sendStatus(500);
     }
 
@@ -80,8 +80,10 @@ router.post('/signin', (req, res) => {
       username: found[0].username,
       email: found[0].email,
       id: found[0].id,
-    }));
+    }, process.env.JWT_SECRET));
   });
+
+  return null;
 });
 
 module.exports = router;
