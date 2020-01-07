@@ -1,6 +1,8 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const nodeMailerReal = require('nodemailer');
+const nodeMailerMock = require('nodemailer-mock');
 const Users = require('../Models/Users');
 const {
   verifyToken, passwordHash, getTokenSet,
@@ -8,7 +10,12 @@ const {
 
 const router = express.Router();
 
-router.get('/', verifyToken, (req, res) => {
+let nodeMailer = nodeMailerReal;
+if (process.env.MODE && process.env.MODE === 'TEST') {
+  nodeMailer = nodeMailerMock;
+}
+
+router.get('/users', verifyToken, (req, res) => {
   jwt.verify(req.token, process.env.JWT_SECRET);
   const { prefix } = req.query;
 
@@ -26,19 +33,30 @@ router.get('/', verifyToken, (req, res) => {
   });
 });
 
-router.post('/signup', (req, res) => {
+router.post('/register', (req, res) => {
   const { username, email, password } = req.body;
   if (!username || !email || !password) {
-    return res.sendStatus(400);
+    return res.status(400).json(
+      {
+        code: 400,
+        message: 'Please provide valid username, email, and passwords',
+      },
+    );
   }
 
   Users.find({ username, email }, (err, found) => {
     if (err) {
-      return res.sendStatus(500);
+      return res.status(500).json({
+        code: 500,
+        message: 'Unexpected server error occurred, please try it later',
+      });
     }
 
     if (found.length > 0) {
-      return res.status(401).json({ error: 'User exists' });
+      return res.status(409).json({
+        code: 409,
+        message: 'User exists already',
+      });
     }
 
     const hashedPass = passwordHash(password);
@@ -46,8 +64,28 @@ router.post('/signup', (req, res) => {
 
     newUser.save((error, saved) => {
       if (error) {
-        return res.sendStatus(500);
+        return res.status(500).json({
+          code: 500,
+          message: 'Unexpected server error occurred, please try it later',
+        });
       }
+
+      const mailer = nodeMailer.createTransport({
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
+        },
+      });
+
+      mailer.sendMail({
+        to: email,
+        subject: 'Welcome to Money Honey Application',
+        body: '',
+      });
+
       return res.json(getTokenSet({ username, email, id: saved.id }, process.env.JWT_SECRET));
     });
 
@@ -57,7 +95,7 @@ router.post('/signup', (req, res) => {
   return null;
 });
 
-router.post('/signin', (req, res) => {
+router.post('/users/signin', (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
     return res.sendStatus(400);

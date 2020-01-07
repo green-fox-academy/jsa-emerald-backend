@@ -18,7 +18,7 @@ app.use(express.urlencoded({ extended: false }));
 
 // Route
 app.use('/', indexRouter);
-app.use('/users', userRouter);
+app.use('/', userRouter);
 
 app.get('*', (req, res) => {
   res.sendStatus(404);
