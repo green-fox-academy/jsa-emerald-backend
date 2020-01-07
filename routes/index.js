@@ -54,9 +54,6 @@ router.post('/backup', verifyToken, (req, res) => {
 });
 
 router.get('/backup', verifyToken, (req, res) => {
-  if (!req.authUser) {
-    return;
-  }
   const { username } = req.authUser;
   Users.findOne({ username }, (err, found) => {
     if (err) {
