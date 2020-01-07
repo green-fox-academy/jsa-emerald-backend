@@ -7,16 +7,21 @@ const getReqToken = (req) => {
   if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
     [, token] = req.headers.authorization.split(' ');
   }
+
   return token;
 };
 
 const verifyToken = (req, res, next) => {
   const token = getReqToken(req);
   if (token === '') {
-    return res.sendStatus(401);
+    return res.status(401).json({ code: 401, message: 'Please provide valid authorized token' });
   }
-  req.token = token;
-  return next();
+  try {
+    req.authUser = jwt.verify(token, process.env.JWT_SECRET);
+    return next();
+  } catch (error) {
+    return res.status(401).json({ code: 401, message: 'Please provide valid authorized token' });
+  }
 };
 
 const passwordHash = (password) => {
