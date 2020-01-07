@@ -1,8 +1,6 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const nodeMailerReal = require('nodemailer');
-const nodeMailerMock = require('nodemailer-mock');
 const Users = require('../Models/Users');
 const {
   verifyToken, passwordHash, getTokenSet,
@@ -11,20 +9,6 @@ const mailer = require('../Utils/Mailer');
 
 const router = express.Router();
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> JSAEM2-31 fixed: change requests from QA
-let nodeMailer = nodeMailerReal;
-if (process.env.MODE && process.env.MODE === 'TEST') {
-  nodeMailer = nodeMailerMock;
-}
-
-<<<<<<< HEAD
->>>>>>> JSAEM2-31 fixed: change requests from QA
-=======
->>>>>>> JSAEM2-31 fixed: change requests from QA
 router.get('/users', verifyToken, (req, res) => {
   jwt.verify(req.token, process.env.JWT_SECRET);
   const { prefix } = req.query;
@@ -80,38 +64,11 @@ router.post('/register', (req, res) => {
         });
       }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> JSAEM2-31 fixed: change requests from QA
-      const mailer = nodeMailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 465,
-        secure: true,
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS,
-        },
-      });
-
-<<<<<<< HEAD
->>>>>>> JSAEM2-31 fixed: change requests from QA
-=======
->>>>>>> JSAEM2-31 fixed: change requests from QA
       mailer.sendMail({
         to: email,
         subject: 'Welcome to Money Honey Application',
         body: '',
-<<<<<<< HEAD
-<<<<<<< HEAD
       }, () => {});
-=======
-      });
->>>>>>> JSAEM2-31 fixed: change requests from QA
-=======
-      });
->>>>>>> JSAEM2-31 fixed: change requests from QA
 
       return res.json(getTokenSet({ username, email, id: saved.id }, process.env.JWT_SECRET));
     });
