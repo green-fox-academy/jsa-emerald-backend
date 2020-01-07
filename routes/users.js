@@ -12,12 +12,18 @@ const mailer = require('../Utils/Mailer');
 const router = express.Router();
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> JSAEM2-31 fixed: change requests from QA
 let nodeMailer = nodeMailerReal;
 if (process.env.MODE && process.env.MODE === 'TEST') {
   nodeMailer = nodeMailerMock;
 }
 
+<<<<<<< HEAD
+>>>>>>> JSAEM2-31 fixed: change requests from QA
+=======
 >>>>>>> JSAEM2-31 fixed: change requests from QA
 router.get('/users', verifyToken, (req, res) => {
   jwt.verify(req.token, process.env.JWT_SECRET);
@@ -75,7 +81,10 @@ router.post('/register', (req, res) => {
       }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> JSAEM2-31 fixed: change requests from QA
       const mailer = nodeMailer.createTransport({
         host: 'smtp.gmail.com',
         port: 465,
@@ -86,13 +95,20 @@ router.post('/register', (req, res) => {
         },
       });
 
+<<<<<<< HEAD
+>>>>>>> JSAEM2-31 fixed: change requests from QA
+=======
 >>>>>>> JSAEM2-31 fixed: change requests from QA
       mailer.sendMail({
         to: email,
         subject: 'Welcome to Money Honey Application',
         body: '',
 <<<<<<< HEAD
+<<<<<<< HEAD
       }, () => {});
+=======
+      });
+>>>>>>> JSAEM2-31 fixed: change requests from QA
 =======
       });
 >>>>>>> JSAEM2-31 fixed: change requests from QA
