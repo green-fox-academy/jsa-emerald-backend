@@ -14,14 +14,14 @@ const getReqToken = (req) => {
 const verifyToken = (req, res, next) => {
   const token = getReqToken(req);
   if (token === '') {
-    return res.sendStatus(401);
+    return res.status(401).json({ code: 401, message: 'Please provide valid authorized token' });
   }
   try {
     req.authUser = jwt.verify(token, process.env.JWT_SECRET);
     req.token = token;
     return next();
   } catch (error) {
-    return res.sendStatus(401);
+    return res.status(401).json({ code: 401, message: 'Please provide valid authorized token' });
   }
 };
 
