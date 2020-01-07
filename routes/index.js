@@ -23,16 +23,9 @@ router.get('/heartbeat', (req, res) => {
 });
 
 router.post('/backup', verifyToken, (req, res) => {
-  let decoded;
-  try {
-    decoded = jwt.verify(req.token, process.env.JWT_SECRET);
-  } catch (err) {
-    return res.sendStatus(401);
-  }
-  const { username } = decoded;
+  const { username } = req.authUser;
   const { transactions } = req.body;
-
-  if (!transactions) {
+  if (!transactions || transactions.length === 0) {
     return res.sendStatus(400);
   }
 
@@ -45,7 +38,7 @@ router.post('/backup', verifyToken, (req, res) => {
     },
     (err) => {
       if (err) {
-        return res.sendStatus(500);
+        return res.status(500).json({ code: 500, message: 'Unexpected error occurred, please try again later' });
       }
       return res.sendStatus(200);
     },
@@ -60,7 +53,7 @@ router.get('/backup', verifyToken, (req, res) => {
       return res.status(500).json({ code: 500, message: 'Unexpected error occurred, please try again later' });
     }
     const { transactions } = found;
-    return res.json(transactions);
+    return res.status(200).json({ code: 200, message: transactions });
   });
 });
 
