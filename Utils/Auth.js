@@ -18,6 +18,7 @@ const verifyToken = (req, res, next) => {
   }
   try {
     req.authUser = jwt.verify(token, process.env.JWT_SECRET);
+    req.token = token;
     return next();
   } catch (error) {
     return res.sendStatus(401);
