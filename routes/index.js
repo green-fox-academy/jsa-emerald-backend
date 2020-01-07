@@ -53,23 +53,18 @@ router.post('/backup', verifyToken, (req, res) => {
   return null;
 });
 
-router.get('/restore', verifyToken, (req, res) => {
-  let decoded;
-  try {
-    decoded = jwt.verify(req.token, process.env.JWT_SECRET);
-  } catch (err) {
-    return res.sendStatus(401);
+router.get('/backup', verifyToken, (req, res) => {
+  if (!req.authUser) {
+    return;
   }
-  const { username } = decoded;
-
+  const { username } = req.authUser;
   Users.findOne({ username }, (err, found) => {
     if (err) {
-      return res.sendStatus(500);
+      return res.status(500).json({ code: 500, message: 'Unexpected error occurred, please try again later' });
     }
     const { transactions } = found;
     return res.json(transactions);
   });
-  return null;
 });
 
 router.post('/family', verifyToken, async (req, res) => {
