@@ -73,7 +73,6 @@ describe('Auth Utility File', () => {
     expect(resObj30day.email).toEqual(obj.email);
   });
 
-
   const mockResponse = () => {
     const res = {};
     res.sendStatus = jest.fn((val) => { res.status = val; });
@@ -88,11 +87,11 @@ describe('Auth Utility File', () => {
     expect(res.status).toEqual(401);
   });
 
-  it('verifyToken', async () => {
+  it('verifyToken Failed', async () => {
     const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9';
     const req = { headers: { authorization: `Bearer ${token}` } };
     const res = mockResponse();
     await verifyToken(req, res, () => {});
-    expect(req.token).toEqual(token);
+    expect(req.token).toEqual(undefined);
   });
 });
