@@ -64,6 +64,7 @@ router.post('/register', (req, res) => {
         });
       }
 
+
       mailer.sendMail({
         to: email,
         subject: 'Welcome to Money Honey Application',
