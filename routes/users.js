@@ -1,19 +1,13 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const nodeMailerReal = require('nodemailer');
-const nodeMailerMock = require('nodemailer-mock');
 const Users = require('../Models/Users');
 const {
   verifyToken, passwordHash, getTokenSet,
 } = require('../Utils/Auth');
+const mailer = require('../Utils/Mailer');
 
 const router = express.Router();
-
-let nodeMailer = nodeMailerReal;
-if (process.env.MODE && process.env.MODE === 'TEST') {
-  nodeMailer = nodeMailerMock;
-}
 
 router.get('/users', verifyToken, (req, res) => {
   jwt.verify(req.token, process.env.JWT_SECRET);
@@ -70,21 +64,11 @@ router.post('/register', (req, res) => {
         });
       }
 
-      const mailer = nodeMailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 465,
-        secure: true,
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS,
-        },
-      });
-
       mailer.sendMail({
         to: email,
         subject: 'Welcome to Money Honey Application',
         body: '',
-      });
+      }, () => {});
 
       return res.json(getTokenSet({ username, email, id: saved.id }, process.env.JWT_SECRET));
     });
