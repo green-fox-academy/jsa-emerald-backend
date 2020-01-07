@@ -385,13 +385,13 @@ describe('Users Route', () => {
 
   it('Restore without token', async () => {
     const res = await request(app)
-      .get('/restore');
+      .get('/backup');
     expect(res.statusCode).toEqual(401);
   });
 
   it('Restore with expired token', async () => {
     const res = await request(app)
-      .get('/restore')
+      .get('/backup')
       .set('Authorization', expiredToken);
     expect(res.statusCode).toEqual(401);
   });
@@ -399,7 +399,7 @@ describe('Users Route', () => {
   it('Restore with valid user', async () => {
     const token = `Bearer ${accessToken}`;
     const res = await request(app)
-      .get('/restore')
+      .get('/backup')
       .set('Authorization', token);
     expect(res.statusCode).toEqual(200);
   });
@@ -449,7 +449,7 @@ describe('Users Route', () => {
     mongoose.connection.close(true);
     const token = `Bearer ${accessToken}`;
     const res = await request(app)
-      .get('/restore')
+      .get('/backup')
       .set('Authorization', token);
     expect(res.statusCode).toEqual(500);
     await testDBInit();
