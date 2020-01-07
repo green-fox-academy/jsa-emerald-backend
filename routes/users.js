@@ -91,7 +91,11 @@ router.post('/sessions', (req, res) => {
     }
 
     if (found.length === 0) {
+<<<<<<< HEAD
       return res.status(401).json({ code: 401, message: 'Please provide valid email and password' });
+=======
+      return res.status(404).json({ code: 404, message: 'User Not Found' });
+>>>>>>> JSAEM2-32 fixed: login backend
     }
 
     if (!bcrypt.compareSync(password, found[0].hashedPass)) {
