@@ -11,19 +11,26 @@ const router = express.Router();
 
 router.get('/users', verifyToken, (req, res) => {
   jwt.verify(req.token, process.env.JWT_SECRET);
-  const { prefix } = req.query;
+  const { contain } = req.query;
 
   Users.find((err, userList) => {
     if (err) {
       return res.sendStatus(500);
     }
 
-    if (!prefix) {
-      return res.json({ userList });
+    const returnList = userList.map((item) => ({
+      id: item.id,
+      username: item.username,
+      email: item.email,
+    }));
+
+    if (!contain) {
+      return res.json(returnList);
     }
 
-    const filteredUserList = userList.filter((user) => user.username.includes(prefix));
-    return res.json({ userList: filteredUserList });
+    const filteredUserList = returnList
+      .filter((user) => user.username.includes(contain));
+    return res.json(filteredUserList);
   });
 });
 

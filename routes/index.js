@@ -31,9 +31,8 @@ router.post('/backup', verifyToken, (req, res) => {
   }
   const { username } = decoded;
   const { transactions } = req.body;
-
   if (!transactions) {
-    return res.sendStatus(400);
+    return res.status(400).json({ code: 400, message: 'No transactions found' });
   }
 
   Users.updateOne(
@@ -45,7 +44,7 @@ router.post('/backup', verifyToken, (req, res) => {
     },
     (err) => {
       if (err) {
-        return res.sendStatus(500);
+        return res.status(500).json({ code: 500, message: 'Unexpected error occurred, please try again later' });
       }
       return res.sendStatus(200);
     },
@@ -53,7 +52,7 @@ router.post('/backup', verifyToken, (req, res) => {
   return null;
 });
 
-router.get('/restore', verifyToken, (req, res) => {
+router.get('/backup', verifyToken, (req, res) => {
   let decoded;
   try {
     decoded = jwt.verify(req.token, process.env.JWT_SECRET);
@@ -64,7 +63,7 @@ router.get('/restore', verifyToken, (req, res) => {
 
   Users.findOne({ username }, (err, found) => {
     if (err) {
-      return res.sendStatus(500);
+      return res.status(500).json({ code: 500, message: 'Unexpected error occurred, please try again later' });
     }
     const { transactions } = found;
     return res.json(transactions);
@@ -181,7 +180,7 @@ router.get('/family-transactions', verifyToken, async (req, res) => {
   try {
     decoded = jwt.verify(req.token, process.env.JWT_SECRET);
   } catch (err) {
-    return res.sendStatus(401);
+    return res.status(401).json({ code: 401, message: 'Unauthorized' });
   }
 
   const family = await Families.findOne({
@@ -190,7 +189,7 @@ router.get('/family-transactions', verifyToken, async (req, res) => {
   });
 
   if (!family) {
-    return res.json([]);
+    return res.status(404).json({ code: 404, message: 'Family Not Found' });
   }
 
   return res.json(family.transactions);
