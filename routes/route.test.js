@@ -109,7 +109,7 @@ describe('Users Route', () => {
     const res = await request(app)
       .post('/sessions')
       .send({ email: 'john2@gmail.com', password: '12345678' });
-    expect(res.statusCode).toEqual(404);
+    expect(res.statusCode).toEqual(401);
   });
 
   it('sign in with wrong password', async () => {
