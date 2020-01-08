@@ -133,7 +133,7 @@ router.post('/family-transactions', verifyToken, async (req, res) => {
   try {
     decoded = jwt.verify(req.token, process.env.JWT_SECRET);
   } catch (err) {
-    return res.sendStatus(401);
+    return res.status(401).json({ code: 401, message: 'Unauthorized' });
   }
 
   const {
@@ -141,7 +141,10 @@ router.post('/family-transactions', verifyToken, async (req, res) => {
   } = req.body;
 
   if (!amount || !labelName || !date || !type) {
-    return res.sendStatus(400);
+    return res.status(400).json({
+      code: 400,
+      message: 'Please provide valid transaction information',
+    });
   }
 
   const family = await Families.findOne({
@@ -149,13 +152,23 @@ router.post('/family-transactions', verifyToken, async (req, res) => {
       { creator: decoded.id }],
   });
 
+  if (!family) {
+    return res.status(400).json({
+      code: 400,
+      message: 'Please create/join a family first',
+    });
+  }
+
   family.transactions.push(new Transactions({
     creator: decoded.id, amount, labelName, date, type,
   }));
 
   family.save((err) => {
     if (err) {
-      return res.sendStatus(500);
+      return res.status(500).json({
+        code: 500,
+        message: 'Unexpected error occurred, please try it later',
+      });
     }
     return res.sendStatus(200);
   });
