@@ -37,43 +37,43 @@ afterAll(async () => {
 describe('Users Route', () => {
   it('create User with no parameters', async () => {
     const res = await request(app)
-      .post('/users/signup');
+      .post('/register');
     expect(res.statusCode).toEqual(400);
   });
 
   it('create User with one parameter', async () => {
     const res = await request(app)
-      .post('/users/signup')
+      .post('/register')
       .send({ username: 'john' });
     expect(res.statusCode).toEqual(400);
   });
 
   it('create User with two parameters', async () => {
     const res = await request(app)
-      .post('/users/signup')
+      .post('/register')
       .send({ username: 'john', email: 'john@gmail.com' });
     expect(res.statusCode).toEqual(400);
   });
 
   it('create User with correct parameters', async () => {
     const res = await request(app)
-      .post('/users/signup')
+      .post('/register')
       .send({ username: 'john', email: 'john@gmail.com', password: '12345678' });
     expect(res.statusCode).toEqual(200);
   });
 
   it('create another User', async () => {
     const res = await request(app)
-      .post('/users/signup')
+      .post('/register')
       .send({ username: 'mike', email: 'mike@gmail.com', password: '12345678' });
     expect(res.statusCode).toEqual(200);
   });
 
   it('create User with duplicate username', async () => {
     const res = await request(app)
-      .post('/users/signup')
+      .post('/register')
       .send({ username: 'john', email: 'john@gmail.com', password: '12345678' });
-    expect(res.statusCode).toEqual(401);
+    expect(res.statusCode).toEqual(409);
   });
 
   it('sign in with no parameters', async () => {
@@ -155,7 +155,7 @@ describe('Users Route', () => {
   it('create User with DB issue', async () => {
     mongoose.connection.close(true);
     const res = await request(app)
-      .post('/users/signup')
+      .post('/register')
       .send({ username: 'john', email: 'john@gmail.com', password: '12345678' });
     expect(res.statusCode).toEqual(500);
     await testDBInit();
