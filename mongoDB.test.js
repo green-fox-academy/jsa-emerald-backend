@@ -3,6 +3,8 @@ const mongooseInit = require('./mongoDB');
 
 describe('mongoDB', () => {
   it('Mongo DB Connection', () => {
-    mongooseInit().then(() => (expect(mongoose.connection.readyState).toEqual(1)));
+    mongooseInit()
+      .then(() => (expect(mongoose.connection.readyState).toEqual(1)))
+      .catch(() => (expect(mongoose.connection.readyState).toEqual(1)));
   });
 });
