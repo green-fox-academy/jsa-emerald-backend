@@ -77,6 +77,10 @@ router.post('/family', verifyToken, async (req, res) => {
     });
   }
 
+  if (members.length === 0) {
+    return res.status(400).json({ code: 400, message: 'The member list cannot be empty' });
+  }
+
   const memberList = members.map((id) => {
     try {
       return mongoose.Types.ObjectId(id);
@@ -85,14 +89,13 @@ router.post('/family', verifyToken, async (req, res) => {
     }
   }).filter((i) => i);
 
-  if (memberList.length === 0) {
-    return res.status(400).json({ code: 400, message: 'Member list cannot be empty' });
-  }
-
   const filteredMembers = await Users.find({ _id: { $in: memberList } });
 
   if (filteredMembers.length === 0) {
-    return res.status(400).json({ code: 400, message: 'Member list cannot be empty' });
+    return res.status(400).json({
+      code: 400,
+      message: 'The member list does not contain any valid users',
+    });
   }
 
   const newFamily = new Families({
