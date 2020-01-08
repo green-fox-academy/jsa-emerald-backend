@@ -31,9 +31,8 @@ router.post('/backup', verifyToken, (req, res) => {
   }
   const { username } = decoded;
   const { transactions } = req.body;
-
   if (!transactions) {
-    return res.sendStatus(400);
+    return res.status(400).json({ code: 400, message: 'No transactions found' });
   }
 
   Users.updateOne(
@@ -45,7 +44,7 @@ router.post('/backup', verifyToken, (req, res) => {
     },
     (err) => {
       if (err) {
-        return res.sendStatus(500);
+        return res.status(500).json({ code: 500, message: 'Unexpected error occurred, please try again later' });
       }
       return res.sendStatus(200);
     },
