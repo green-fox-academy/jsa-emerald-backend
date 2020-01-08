@@ -143,7 +143,7 @@ router.post('/family-transactions', verifyToken, async (req, res) => {
   if (!amount || !labelName || !date || !type) {
     return res.status(400).json({
       code: 400,
-      message: 'Please provide valid transaction information',
+      message: 'Please provide valid transaction information: { amount, labelName, date, type }',
     });
   }
 
