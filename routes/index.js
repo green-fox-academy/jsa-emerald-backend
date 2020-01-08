@@ -31,8 +31,7 @@ router.post('/backup', verifyToken, (req, res) => {
   }
   const { username } = decoded;
   const { transactions } = req.body;
-
-  if (!transactions) {
+  if (!transactions || transactions.length === 0) {
     return res.sendStatus(400);
   }
 
@@ -45,7 +44,7 @@ router.post('/backup', verifyToken, (req, res) => {
     },
     (err) => {
       if (err) {
-        return res.sendStatus(500);
+        return res.status(500).json({ code: 500, message: 'Unexpected error occurred, please try again later' });
       }
       return res.sendStatus(200);
     },
