@@ -31,7 +31,7 @@ router.post('/backup', verifyToken, (req, res) => {
   }
   const { username } = decoded;
   const { transactions } = req.body;
-  if (!transactions || transactions.length === 0) {
+  if (!transactions) {
     return res.status(400).json({ code: 400, message: 'No transactions found' });
   }
 
