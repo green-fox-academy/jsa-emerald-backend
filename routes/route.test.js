@@ -213,8 +213,7 @@ describe('Users Route', () => {
     const res = await request(app)
       .get('/family-transactions')
       .set('Authorization', token);
-    expect(res.statusCode).toEqual(200);
-    expect(res.body.length).toEqual(0);
+    expect(res.statusCode).toEqual(404);
   });
 
   it('Family Formation without parameter', async () => {

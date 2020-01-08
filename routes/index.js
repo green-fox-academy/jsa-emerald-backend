@@ -168,7 +168,7 @@ router.get('/family-transactions', verifyToken, async (req, res) => {
   try {
     decoded = jwt.verify(req.token, process.env.JWT_SECRET);
   } catch (err) {
-    return res.sendStatus(401);
+    return res.status(401).json({ code: 401, message: 'Unauthorized' });
   }
 
   const family = await Families.findOne({
@@ -177,7 +177,7 @@ router.get('/family-transactions', verifyToken, async (req, res) => {
   });
 
   if (!family) {
-    return res.json([]);
+    return res.status(404).json({ code: 404, message: 'Family Not Found' });
   }
 
   return res.json(family.transactions);
