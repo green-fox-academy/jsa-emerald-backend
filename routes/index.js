@@ -67,7 +67,7 @@ router.get('/backup', verifyToken, (req, res) => {
       return res.status(500).json({ code: 500, message: 'Unexpected error occurred, please try again later' });
     }
     const { transactions } = found;
-    return res.status(200).json(transactions);
+    return res.json(transactions);
   });
   return null;
 });
