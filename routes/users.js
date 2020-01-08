@@ -79,23 +79,23 @@ router.post('/register', (req, res) => {
   return null;
 });
 
-router.post('/users/signin', (req, res) => {
+router.post('/sessions', (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
-    return res.sendStatus(400);
+    return res.status(400).json({ code: 400, message: 'Please provide valid email and password' });
   }
 
   Users.find({ email }, (err, found) => {
     if (err) {
-      return res.sendStatus(500);
+      return res.status(500).json({ code: 500, message: 'Unexpected server error occurred, please try it later' });
     }
 
     if (found.length === 0) {
-      return res.status(401).json({ error: 'No User Found' });
+      return res.status(401).json({ code: 401, message: 'Please provide valid email and password' });
     }
 
     if (!bcrypt.compareSync(password, found[0].hashedPass)) {
-      return res.status(401).json({ error: 'Incorrect Password' });
+      return res.status(401).json({ code: 401, message: 'Please provide valid email and password' });
     }
 
     return res.json(getTokenSet({
