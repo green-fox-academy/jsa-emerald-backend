@@ -132,24 +132,24 @@ describe('Users Route', () => {
     expect(res.statusCode).toEqual(500);
   });
 
-  it('get user list without prefix', async () => {
+  it('get user list without contain', async () => {
     const token = `Bearer ${accessToken}`;
     const res = await request(app)
       .get('/users')
       .set('Authorization', token);
     expect(res.statusCode).toEqual(200);
-    expect(res.body.userList.length).toEqual(2);
+    expect(res.body.length).toEqual(2);
   });
 
-  it('get user list without prefix', async () => {
+  it('get user list without contain', async () => {
     const token = `Bearer ${accessToken}`;
     const res = await request(app)
-      .get('/users?prefix=john')
+      .get('/users?contain=john')
       .set('Authorization', token)
-      .send({ prefix: 'john' });
+      .send({ contain: 'john' });
     expect(res.statusCode).toEqual(200);
-    expect(res.body.userList.length).toEqual(1);
-    expect(res.body.userList[0].username).toEqual('john');
+    expect(res.body.length).toEqual(1);
+    expect(res.body[0].username).toEqual('john');
   });
 
   it('create User with DB issue', async () => {
