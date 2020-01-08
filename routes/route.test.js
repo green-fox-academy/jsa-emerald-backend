@@ -8,6 +8,7 @@ const Users = require('../Models/Users');
 const Families = require('../Models/Families');
 
 let accessToken;
+let singleUser;
 let mikeID;
 const expiredToken = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Ijc4OSIsImVtYWlsIjoiNzg5QGdtYWlsLmNvbSIsImlhdCI6MTU3NzcwMDA2MiwiZXhwIjoxNTc3NzAzNjYyfQ.p3a41KIHC2GtTNchEdsSPwlz0xJIjm2YzZU7yVBmjhg';
 
@@ -62,11 +63,19 @@ describe('Users Route', () => {
     expect(res.statusCode).toEqual(200);
   });
 
-  it('create another User', async () => {
+  it('create another User 1', async () => {
     const res = await request(app)
       .post('/register')
       .send({ username: 'mike', email: 'mike@gmail.com', password: '12345678' });
     expect(res.statusCode).toEqual(200);
+  });
+
+  it('create another User 2', async () => {
+    const res = await request(app)
+      .post('/register')
+      .send({ username: 'single', email: 'single@gmail.com', password: '12345678' });
+    expect(res.statusCode).toEqual(200);
+    singleUser = res.body.accessToken;
   });
 
   it('create User with duplicate username', async () => {
@@ -138,7 +147,7 @@ describe('Users Route', () => {
       .get('/users')
       .set('Authorization', token);
     expect(res.statusCode).toEqual(200);
-    expect(res.body.length).toEqual(2);
+    expect(res.body.userList.length).toEqual(3);
   });
 
   it('get user list without contain', async () => {
@@ -318,6 +327,17 @@ describe('Users Route', () => {
       .post('/family-transactions')
       .set('Authorization', token)
       .send({ amount: 100, labelName: 'weChat', date: 543567 });
+    expect(res.statusCode).toEqual(400);
+  });
+
+  it('Family Transaction Creation with single user', async () => {
+    const token = `Bearer ${singleUser}`;
+    const res = await request(app)
+      .post('/family-transactions')
+      .set('Authorization', token)
+      .send({
+        amount: 100, labelName: 'weChat', date: 543567, type: 'Expense',
+      });
     expect(res.statusCode).toEqual(400);
   });
 
