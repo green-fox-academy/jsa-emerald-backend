@@ -238,7 +238,7 @@ describe('Users Route', () => {
     const res = await request(app)
       .post('/family')
       .set('Authorization', token)
-      .send({ members: '' });
+      .send({ members: [] });
     expect(res.statusCode).toEqual(400);
   });
 
@@ -247,7 +247,7 @@ describe('Users Route', () => {
     const res = await request(app)
       .post('/family')
       .set('Authorization', token)
-      .send({ members: '123,123' });
+      .send({ members: ['123', '123'] });
     expect(res.statusCode).toEqual(400);
   });
 
@@ -256,7 +256,7 @@ describe('Users Route', () => {
     const res = await request(app)
       .post('/family')
       .set('Authorization', token)
-      .send({ members: '507f1f77bcf86cd799439011,507f1f77bcf86cd799439011' });
+      .send({ members: ['507f1f77bcf86cd799439011', '507f1f77bcf86cd799439011'] });
     expect(res.statusCode).toEqual(400);
   });
 
@@ -267,7 +267,7 @@ describe('Users Route', () => {
       const res = await request(app)
         .post('/family')
         .set('Authorization', token)
-        .send({ members: mikeID });
+        .send({ members: [mikeID] });
       expect(res.statusCode).toEqual(500);
       await testDBInit();
     }, 500);
@@ -278,7 +278,7 @@ describe('Users Route', () => {
     const res = await request(app)
       .post('/family')
       .set('Authorization', token)
-      .send({ members: mikeID });
+      .send({ members: [mikeID] });
     expect(res.statusCode).toEqual(200);
   });
 

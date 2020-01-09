@@ -1,19 +1,13 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
-const nodeMailerReal = require('nodemailer');
-const nodeMailerMock = require('nodemailer-mock');
 const { verifyToken } = require('../Utils/Auth');
 const Families = require('../Models/Families');
 const Users = require('../Models/Users');
 const Transactions = require('../Models/Transaction');
+const mailer = require('../Utils/Mailer');
 
 const router = express.Router();
-
-let nodeMailer = nodeMailerReal;
-if (process.env.MODE && process.env.MODE === 'TEST') {
-  nodeMailer = nodeMailerMock;
-}
 
 router.get('/heartbeat', (req, res) => {
   if (mongoose.connection.readyState === 1) {
@@ -76,10 +70,17 @@ router.post('/family', verifyToken, async (req, res) => {
 
   const { members } = req.body;
   if (!members) {
-    return res.sendStatus(400);
+    return res.status(400).json({
+      code: 400,
+      message: 'Please provide a valid list of members',
+    });
   }
 
-  const memberList = members.split(',').map((id) => {
+  if (members.length === 0) {
+    return res.status(400).json({ code: 400, message: 'The member list cannot be empty' });
+  }
+
+  const memberList = members.map((id) => {
     try {
       return mongoose.Types.ObjectId(id);
     } catch (err) {
@@ -87,14 +88,13 @@ router.post('/family', verifyToken, async (req, res) => {
     }
   }).filter((i) => i);
 
-  if (memberList.length === 0) {
-    return res.sendStatus(400);
-  }
-
   const filteredMembers = await Users.find({ _id: { $in: memberList } });
 
   if (filteredMembers.length === 0) {
-    return res.sendStatus(400);
+    return res.status(400).json({
+      code: 400,
+      message: 'The member list does not contain any valid users',
+    });
   }
 
   const newFamily = new Families({
@@ -104,25 +104,19 @@ router.post('/family', verifyToken, async (req, res) => {
 
   newFamily.save((err) => {
     if (err) {
-      return res.sendStatus(500);
+      return res.status(500).json({
+        code: 500,
+        message: 'Unexpected error occurred, please try it later',
+      });
     }
-
-    const mailer = nodeMailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 465,
-      secure: true,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
 
     mailer.sendMail({
       to: filteredMembers.map((user) => user.email),
       subject: 'New Family Group From Money Honey',
       body: '',
-    }, () => res.sendStatus(200));
-    return null;
+    }, () => {});
+
+    return res.sendStatus(200);
   });
   return null;
 });
