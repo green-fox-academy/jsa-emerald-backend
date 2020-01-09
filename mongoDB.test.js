@@ -1,11 +1,9 @@
-const mongoose = require('mongoose');
 const mongooseInit = require('./mongoDB');
+require('dotenv').config();
 
 describe('mongoDB', () => {
-  it('Mongo DB Connection', () => {
-    mongooseInit();
-    setTimeout(() => {
-      expect(mongoose.connection.readyState).toEqual(1);
-    }, 1500);
+  it('Mongo DB Connection', async () => {
+    const conn = await mongooseInit();
+    expect(conn.connection.readyState).toEqual(1);
   });
 });
