@@ -43,7 +43,7 @@ router.post('/register', (req, res) => {
     );
   }
 
-  User.find({ username, email }, (err, found) => {
+  User.find({ email }, (err, found) => {
     if (err) {
       return res.status(500).json({
         code: 500,
