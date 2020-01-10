@@ -1,9 +1,9 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const { verifyToken } = require('../Utils/Auth');
-const Families = require('../Models/Families');
-const Users = require('../Models/Users');
-const Transactions = require('../Models/Transaction');
+const Family = require('../Model/Family');
+const User = require('../Model/User');
+const Transaction = require('../Model/Transaction');
 const mailer = require('../Utils/Mailer');
 
 const router = express.Router();
@@ -22,7 +22,7 @@ router.post('/backup', verifyToken, (req, res) => {
     return res.status(400).json({ code: 400, message: 'No transactions found' });
   }
 
-  Users.updateOne(
+  User.updateOne(
     { username },
     {
       $set: {
@@ -42,7 +42,7 @@ router.post('/backup', verifyToken, (req, res) => {
 router.get('/backup', verifyToken, (req, res) => {
   const { username } = req.authUser;
 
-  Users.findOne({ username }, (err, found) => {
+  User.findOne({ username }, (err, found) => {
     if (err) {
       return res.status(500).json({ code: 500, message: 'Unexpected error occurred, please try again later' });
     }
@@ -73,16 +73,16 @@ router.post('/family', verifyToken, async (req, res) => {
     }
   }).filter((i) => i);
 
-  const filteredMembers = await Users.find({ _id: { $in: memberList } });
+  const filteredMembers = await User.find({ _id: { $in: memberList } });
 
   if (filteredMembers.length === 0) {
     return res.status(400).json({
       code: 400,
-      message: 'The member list does not contain any valid users',
+      message: 'The member list does not contain any valid user',
     });
   }
 
-  const newFamily = new Families({
+  const newFamily = new Family({
     creator: req.authUser.id,
     members: filteredMembers.map((user) => user.id),
   });
@@ -118,7 +118,7 @@ router.post('/family-transactions', verifyToken, async (req, res) => {
     });
   }
 
-  const family = await Families.findOne({
+  const family = await Family.findOne({
     $or: [{ members: req.authUser.id },
       { creator: req.authUser.id }],
   });
@@ -130,7 +130,7 @@ router.post('/family-transactions', verifyToken, async (req, res) => {
     });
   }
 
-  family.transactions.push(new Transactions({
+  family.transactions.push(new Transaction({
     creator: req.authUser.id, amount, labelName, date, type,
   }));
 
@@ -148,7 +148,7 @@ router.post('/family-transactions', verifyToken, async (req, res) => {
 });
 
 router.get('/family-transactions', verifyToken, async (req, res) => {
-  const family = await Families.findOne({
+  const family = await Family.findOne({
     $or: [{ members: req.authUser.id },
       { creator: req.authUser.id }],
   });

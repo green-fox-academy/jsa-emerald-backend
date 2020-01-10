@@ -4,8 +4,8 @@ const jwt = require('jsonwebtoken');
 const app = require('../app');
 require('dotenv').config();
 
-const Users = require('../Models/Users');
-const Families = require('../Models/Families');
+const User = require('../Model/User');
+const Family = require('../Model/Family');
 
 let accessToken;
 let singleUser;
@@ -23,19 +23,19 @@ const testDBInit = async () => {
       process.exit(1);
     }
   });
-  await Users.createCollection();
-  await Families.createCollection();
+  await User.createCollection();
+  await Family.createCollection();
 };
 
 beforeAll(testDBInit);
 
 afterAll(async () => {
-  mongoose.connection.db.dropCollection('users', () => {});
-  mongoose.connection.db.dropCollection('families', () => {});
+  mongoose.connection.db.dropCollection('User', () => {});
+  mongoose.connection.db.dropCollection('Family', () => {});
   await mongoose.connection.close();
 });
 
-describe('Users Route', () => {
+describe('User Route', () => {
   it('create User with no parameters', async () => {
     const res = await request(app)
       .post('/register');
@@ -190,7 +190,7 @@ describe('Users Route', () => {
   });
 });
 
-describe('Users Route', () => {
+describe('User Route', () => {
   it('GET Not Found Page', async () => {
     const res = await request(app)
       .get('/NOT/EXITS');
