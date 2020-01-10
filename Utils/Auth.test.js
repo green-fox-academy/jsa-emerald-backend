@@ -87,12 +87,4 @@ describe('Auth Utility File', () => {
     await verifyToken(req, res, () => {});
     expect(res.status).toEqual(401);
   });
-
-  it('verifyToken', async () => {
-    const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9';
-    const req = { headers: { authorization: `Bearer ${token}` } };
-    const res = mockResponse();
-    await verifyToken(req, res, () => {});
-    expect(req.token).toEqual(token);
-  });
 });

@@ -1,5 +1,4 @@
 const express = require('express');
-const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const Users = require('../Models/Users');
 const {
@@ -10,7 +9,6 @@ const mailer = require('../Utils/Mailer');
 const router = express.Router();
 
 router.get('/users', verifyToken, (req, res) => {
-  jwt.verify(req.token, process.env.JWT_SECRET);
   const { contain } = req.query;
 
   Users.find((err, userList) => {

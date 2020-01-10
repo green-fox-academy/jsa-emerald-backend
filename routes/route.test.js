@@ -138,7 +138,7 @@ describe('Users Route', () => {
     const res = await request(app)
       .get('/users')
       .set('Authorization', expiredToken);
-    expect(res.statusCode).toEqual(500);
+    expect(res.statusCode).toEqual(401);
   });
 
   it('get user list without contain', async () => {
