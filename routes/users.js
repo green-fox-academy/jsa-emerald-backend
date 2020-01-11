@@ -103,11 +103,14 @@ router.post('/sessions', (req, res) => {
       return res.status(401).json({ code: 401, message: 'Please provide valid email and password' });
     }
 
-    return res.json(getTokenSet({
+    return res.json({
+      ...getTokenSet({
+        username: found[0].username,
+        email: found[0].email,
+        id: found[0].id,
+      }, process.env.JWT_SECRET),
       username: found[0].username,
-      email: found[0].email,
-      id: found[0].id,
-    }, process.env.JWT_SECRET));
+    });
   });
 
   return null;
