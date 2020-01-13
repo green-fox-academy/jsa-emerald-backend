@@ -40,7 +40,7 @@ router.post('/family', verifyToken, async (req, res) => {
 
   const family = await Family.findOne({
     $or: [{ members: req.authUser.id },
-      { creator: req.authUser.id }],
+    { creator: req.authUser.id }],
   });
 
   if (family) {
@@ -66,7 +66,7 @@ router.post('/family', verifyToken, async (req, res) => {
       to: filteredMembers.map((user) => user.email),
       subject: 'New Family Group From Money Honey',
       body: '',
-    }, () => {});
+    }, () => { });
 
     return res.sendStatus(200);
   });
@@ -87,7 +87,7 @@ router.post('/family-transactions', verifyToken, async (req, res) => {
 
   const family = await Family.findOne({
     $or: [{ members: req.authUser.id },
-      { creator: req.authUser.id }],
+    { creator: req.authUser.id }],
   });
 
   if (!family) {
@@ -117,7 +117,7 @@ router.post('/family-transactions', verifyToken, async (req, res) => {
 router.get('/family-transactions', verifyToken, async (req, res) => {
   const family = await Family.findOne({
     $or: [{ members: req.authUser.id },
-      { creator: req.authUser.id }],
+    { creator: req.authUser.id }],
   });
 
   if (!family) {
