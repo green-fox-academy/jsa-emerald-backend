@@ -11,7 +11,7 @@ const router = express.Router();
 router.get('/users', verifyToken, (req, res) => {
   const { contain } = req.query;
 
-  User.find((err, userList) => {
+  User.find({ _id: { $ne: req.authUser.id } }, (err, userList) => {
     if (err) {
       return res.sendStatus(500);
     }

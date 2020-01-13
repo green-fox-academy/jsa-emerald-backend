@@ -40,7 +40,7 @@ router.post('/family', verifyToken, async (req, res) => {
 
   const family = await Family.findOne({
     $or: [{ members: req.authUser.id },
-    { creator: req.authUser.id }],
+      { creator: req.authUser.id }],
   });
 
   if (family) {
@@ -87,7 +87,7 @@ router.post('/family-transactions', verifyToken, async (req, res) => {
 
   const family = await Family.findOne({
     $or: [{ members: req.authUser.id },
-    { creator: req.authUser.id }],
+      { creator: req.authUser.id }],
   });
 
   if (!family) {
@@ -98,7 +98,7 @@ router.post('/family-transactions', verifyToken, async (req, res) => {
   }
 
   family.transactions.push(new Transaction({
-    creator: req.authUser.id, amount, labelName, date, type,
+    creator: req.authUser.username, amount, labelName, date, type,
   }));
 
   family.save((err) => {
@@ -117,7 +117,7 @@ router.post('/family-transactions', verifyToken, async (req, res) => {
 router.get('/family-transactions', verifyToken, async (req, res) => {
   const family = await Family.findOne({
     $or: [{ members: req.authUser.id },
-    { creator: req.authUser.id }],
+      { creator: req.authUser.id }],
   });
 
   if (!family) {
