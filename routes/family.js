@@ -1,5 +1,4 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const Transaction = require('../Model/Transaction');
 const mailer = require('../Utils/Mailer');
 const Family = require('../Model/Family');
@@ -21,15 +20,7 @@ router.post('/family', verifyToken, async (req, res) => {
     return res.status(400).json({ code: 400, message: 'The member list cannot be empty' });
   }
 
-  const memberList = members.map((id) => {
-    try {
-      return mongoose.Types.ObjectId(id);
-    } catch (err) {
-      return null;
-    }
-  }).filter((i) => i);
-
-  const filteredMembers = await User.find({ _id: { $in: memberList } });
+  const filteredMembers = await User.find({ username: { $in: members } });
 
   if (filteredMembers.length === 0) {
     return res.status(400).json({
@@ -39,19 +30,19 @@ router.post('/family', verifyToken, async (req, res) => {
   }
 
   const family = await Family.findOne({
-    $or: [{ members: req.authUser.id },
-      { creator: req.authUser.id }],
+    $or: [{ members: req.authUser.username },
+      { creator: req.authUser.username }],
   });
 
   if (family) {
-    family.members = filteredMembers.map((user) => user.id);
+    family.members = filteredMembers.map((user) => user.username);
     family.save();
     return res.sendStatus(200);
   }
 
   const newFamily = new Family({
-    creator: req.authUser.id,
-    members: filteredMembers.map((user) => user.id),
+    creator: req.authUser.username,
+    members: filteredMembers.map((user) => user.username),
   });
 
   newFamily.save((err) => {
@@ -86,8 +77,8 @@ router.post('/family-transactions', verifyToken, async (req, res) => {
   }
 
   const family = await Family.findOne({
-    $or: [{ members: req.authUser.id },
-      { creator: req.authUser.id }],
+    $or: [{ members: req.authUser.username },
+      { creator: req.authUser.username }],
   });
 
   if (!family) {
@@ -116,8 +107,8 @@ router.post('/family-transactions', verifyToken, async (req, res) => {
 
 router.get('/family-transactions', verifyToken, async (req, res) => {
   const family = await Family.findOne({
-    $or: [{ members: req.authUser.id },
-      { creator: req.authUser.id }],
+    $or: [{ members: req.authUser.username },
+      { creator: req.authUser.username }],
   });
 
   if (!family) {
@@ -129,15 +120,15 @@ router.get('/family-transactions', verifyToken, async (req, res) => {
 
 router.get('/family-members', verifyToken, async (req, res) => {
   const family = await Family.findOne({
-    $or: [{ members: req.authUser.id },
-      { creator: req.authUser.id }],
+    $or: [{ members: req.authUser.username },
+      { creator: req.authUser.username }],
   });
 
   if (!family) {
     return res.status(404).json({ code: 404, message: 'Family Not Found' });
   }
 
-  return res.json({ code: 200, data: family.members.map((item) => ({ ...item, url: 'https://s3.amazonaws.com/uifaces/faces/twitter/ladylexy/128.jpg' })) });
+  return res.json({ code: 200, data: family.members.map((username) => ({ username, url: 'https://s3.amazonaws.com/uifaces/faces/twitter/ladylexy/128.jpg' })) });
 });
 
 module.exports = router;
