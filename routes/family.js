@@ -124,7 +124,7 @@ router.get('/family-transactions', verifyToken, async (req, res) => {
     return res.status(404).json({ code: 404, message: 'Family Not Found' });
   }
 
-  return res.json(family.transactions);
+  return res.json({ code: 200, data: family.transactions });
 });
 
 module.exports = router;
