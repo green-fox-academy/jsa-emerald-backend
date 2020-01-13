@@ -38,6 +38,17 @@ router.post('/family', verifyToken, async (req, res) => {
     });
   }
 
+  const family = await Family.findOne({
+    $or: [{ members: req.authUser.id },
+      { creator: req.authUser.id }],
+  });
+
+  if (family) {
+    family.members = filteredMembers.map((user) => user.id);
+    family.save();
+    return res.sendStatus(200);
+  }
+
   const newFamily = new Family({
     creator: req.authUser.id,
     members: filteredMembers.map((user) => user.id),
