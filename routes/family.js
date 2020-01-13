@@ -127,4 +127,17 @@ router.get('/family-transactions', verifyToken, async (req, res) => {
   return res.json({ code: 200, data: family.transactions });
 });
 
+router.get('/family-members', verifyToken, async (req, res) => {
+  const family = await Family.findOne({
+    $or: [{ members: req.authUser.id },
+      { creator: req.authUser.id }],
+  });
+
+  if (!family) {
+    return res.status(404).json({ code: 404, message: 'Family Not Found' });
+  }
+
+  return res.json({ code: 200, data: family.members.map((item) => ({ ...item, url: 'https://s3.amazonaws.com/uifaces/faces/twitter/ladylexy/128.jpg' })) });
+});
+
 module.exports = router;
