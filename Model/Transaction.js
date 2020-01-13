@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const Transaction = new mongoose.Schema({
-  creator: mongoose.Schema.Types.ObjectId,
+  creator: String,
   amount: Number,
   labelName: Object,
   date: String,
