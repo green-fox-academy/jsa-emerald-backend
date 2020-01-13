@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const Family = new mongoose.Schema({
   members: Array,
-  creator: mongoose.Schema.Types.ObjectId,
+  creator: String,
   transactions: Array,
 });
 
