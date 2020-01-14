@@ -1,7 +1,6 @@
 const express = require('express');
-const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const Users = require('../Models/Users');
+const User = require('../Model/User');
 const {
   verifyToken, passwordHash, getTokenSet,
 } = require('../Utils/Auth');
@@ -10,10 +9,9 @@ const mailer = require('../Utils/Mailer');
 const router = express.Router();
 
 router.get('/users', verifyToken, (req, res) => {
-  jwt.verify(req.token, process.env.JWT_SECRET);
   const { contain } = req.query;
 
-  Users.find((err, userList) => {
+  User.find((err, userList) => {
     if (err) {
       return res.sendStatus(500);
     }
@@ -45,7 +43,7 @@ router.post('/register', (req, res) => {
     );
   }
 
-  Users.find({ username, email }, (err, found) => {
+  User.find({ username, email }, (err, found) => {
     if (err) {
       return res.status(500).json({
         code: 500,
@@ -61,7 +59,7 @@ router.post('/register', (req, res) => {
     }
 
     const hashedPass = passwordHash(password);
-    const newUser = new Users({ username, email, hashedPass });
+    const newUser = new User({ username, email, hashedPass });
 
     newUser.save((error, saved) => {
       if (error) {
@@ -92,7 +90,7 @@ router.post('/sessions', (req, res) => {
     return res.status(400).json({ code: 400, message: 'Please provide valid email and password' });
   }
 
-  Users.find({ email }, (err, found) => {
+  User.find({ email }, (err, found) => {
     if (err) {
       return res.status(500).json({ code: 500, message: 'Unexpected server error occurred, please try it later' });
     }

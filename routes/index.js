@@ -1,10 +1,9 @@
 const express = require('express');
-const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const { verifyToken } = require('../Utils/Auth');
-const Families = require('../Models/Families');
-const Users = require('../Models/Users');
-const Transactions = require('../Models/Transaction');
+const Family = require('../Model/Family');
+const User = require('../Model/User');
+const Transaction = require('../Model/Transaction');
 const mailer = require('../Utils/Mailer');
 
 const router = express.Router();
@@ -17,19 +16,13 @@ router.get('/heartbeat', (req, res) => {
 });
 
 router.post('/backup', verifyToken, (req, res) => {
-  let decoded;
-  try {
-    decoded = jwt.verify(req.token, process.env.JWT_SECRET);
-  } catch (err) {
-    return res.sendStatus(401);
-  }
-  const { username } = decoded;
+  const { username } = req.authUser;
   const { transactions } = req.body;
   if (!transactions) {
     return res.status(400).json({ code: 400, message: 'No transactions found' });
   }
 
-  Users.updateOne(
+  User.updateOne(
     { username },
     {
       $set: {
@@ -47,15 +40,9 @@ router.post('/backup', verifyToken, (req, res) => {
 });
 
 router.get('/backup', verifyToken, (req, res) => {
-  let decoded;
-  try {
-    decoded = jwt.verify(req.token, process.env.JWT_SECRET);
-  } catch (err) {
-    return res.sendStatus(401);
-  }
-  const { username } = decoded;
+  const { username } = req.authUser;
 
-  Users.findOne({ username }, (err, found) => {
+  User.findOne({ username }, (err, found) => {
     if (err) {
       return res.status(500).json({ code: 500, message: 'Unexpected error occurred, please try again later' });
     }
@@ -66,8 +53,6 @@ router.get('/backup', verifyToken, (req, res) => {
 });
 
 router.post('/family', verifyToken, async (req, res) => {
-  const decoded = jwt.verify(req.token, process.env.JWT_SECRET);
-
   const { members } = req.body;
   if (!members) {
     return res.status(400).json({
@@ -88,17 +73,17 @@ router.post('/family', verifyToken, async (req, res) => {
     }
   }).filter((i) => i);
 
-  const filteredMembers = await Users.find({ _id: { $in: memberList } });
+  const filteredMembers = await User.find({ _id: { $in: memberList } });
 
   if (filteredMembers.length === 0) {
     return res.status(400).json({
       code: 400,
-      message: 'The member list does not contain any valid users',
+      message: 'The member list does not contain any valid user',
     });
   }
 
-  const newFamily = new Families({
-    creator: decoded.id,
+  const newFamily = new Family({
+    creator: req.authUser.id,
     members: filteredMembers.map((user) => user.id),
   });
 
@@ -122,13 +107,6 @@ router.post('/family', verifyToken, async (req, res) => {
 });
 
 router.post('/family-transactions', verifyToken, async (req, res) => {
-  let decoded;
-  try {
-    decoded = jwt.verify(req.token, process.env.JWT_SECRET);
-  } catch (err) {
-    return res.status(401).json({ code: 401, message: 'Unauthorized' });
-  }
-
   const {
     amount, labelName, date, type,
   } = req.body;
@@ -140,9 +118,9 @@ router.post('/family-transactions', verifyToken, async (req, res) => {
     });
   }
 
-  const family = await Families.findOne({
-    $or: [{ members: decoded.id },
-      { creator: decoded.id }],
+  const family = await Family.findOne({
+    $or: [{ members: req.authUser.id },
+      { creator: req.authUser.id }],
   });
 
   if (!family) {
@@ -152,8 +130,8 @@ router.post('/family-transactions', verifyToken, async (req, res) => {
     });
   }
 
-  family.transactions.push(new Transactions({
-    creator: decoded.id, amount, labelName, date, type,
+  family.transactions.push(new Transaction({
+    creator: req.authUser.id, amount, labelName, date, type,
   }));
 
   family.save((err) => {
@@ -170,16 +148,9 @@ router.post('/family-transactions', verifyToken, async (req, res) => {
 });
 
 router.get('/family-transactions', verifyToken, async (req, res) => {
-  let decoded;
-  try {
-    decoded = jwt.verify(req.token, process.env.JWT_SECRET);
-  } catch (err) {
-    return res.status(401).json({ code: 401, message: 'Unauthorized' });
-  }
-
-  const family = await Families.findOne({
-    $or: [{ members: decoded.id },
-      { creator: decoded.id }],
+  const family = await Family.findOne({
+    $or: [{ members: req.authUser.id },
+      { creator: req.authUser.id }],
   });
 
   if (!family) {
