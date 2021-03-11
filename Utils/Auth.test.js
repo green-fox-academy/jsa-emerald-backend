@@ -73,7 +73,6 @@ describe('Auth Utility File', () => {
     expect(resObj30day.email).toEqual(obj.email);
   });
 
-
   const mockResponse = () => {
     const res = {};
     res.sendStatus = jest.fn((val) => { res.status = val; });
