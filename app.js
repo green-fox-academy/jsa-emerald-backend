@@ -7,6 +7,7 @@ const mongooseInit = require('./mongoDB');
 const app = express();
 const indexRouter = require('./routes/index');
 const userRouter = require('./routes/users');
+const familyRouter = require('./routes/family');
 
 // DB Init
 mongooseInit();
@@ -19,6 +20,7 @@ app.use(express.urlencoded({ extended: false }));
 // Route
 app.use('/', indexRouter);
 app.use('/', userRouter);
+app.use('/', familyRouter);
 
 app.get('*', (req, res) => {
   res.sendStatus(404);

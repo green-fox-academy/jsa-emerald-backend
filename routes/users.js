@@ -11,7 +11,7 @@ const router = express.Router();
 router.get('/users', verifyToken, (req, res) => {
   const { contain } = req.query;
 
-  User.find((err, userList) => {
+  User.find({ _id: { $ne: req.authUser.id } }, (err, userList) => {
     if (err) {
       return res.sendStatus(500);
     }
@@ -43,7 +43,7 @@ router.post('/register', (req, res) => {
     );
   }
 
-  User.find({ username, email }, (err, found) => {
+  User.find({ email }, (err, found) => {
     if (err) {
       return res.status(500).json({
         code: 500,
@@ -103,11 +103,14 @@ router.post('/sessions', (req, res) => {
       return res.status(401).json({ code: 401, message: 'Please provide valid email and password' });
     }
 
-    return res.json(getTokenSet({
+    return res.json({
+      ...getTokenSet({
+        username: found[0].username,
+        email: found[0].email,
+        id: found[0].id,
+      }, process.env.JWT_SECRET),
       username: found[0].username,
-      email: found[0].email,
-      id: found[0].id,
-    }, process.env.JWT_SECRET));
+    });
   });
 
   return null;
