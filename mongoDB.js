@@ -8,5 +8,4 @@ const mongooseInit = () => mongoose
     useCreateIndex: true,
   });
 
-
 module.exports = mongooseInit;
