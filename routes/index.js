@@ -4,7 +4,6 @@ const { verifyToken } = require('../Utils/Auth');
 
 const User = require('../Model/User');
 
-
 const router = express.Router();
 
 router.get('/heartbeat', (req, res) => {
